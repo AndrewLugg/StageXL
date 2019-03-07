@@ -182,7 +182,7 @@ class Stage extends DisplayObjectContainer {
     var listenToTouchEvents = _inputEventMode == InputEventMode.TouchOnly ||
         _inputEventMode == InputEventMode.MouseAndTouch;
 
-    if (listenToTouchEvents && env.isTouchEventSupported) {
+    if (listenToTouchEvents) {
       canvas.onTouchStart.listen(_onTouchEvent);
       canvas.onTouchEnd.listen(_onTouchEvent);
       canvas.onTouchMove.listen(_onTouchEvent);

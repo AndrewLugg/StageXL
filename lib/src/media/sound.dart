@@ -7,9 +7,8 @@ abstract class Sound {
 
   /// Get a list of the audio types supported by the browser.
 
-  static List<String> get supportedTypes {
-    return AudioLoader.supportedTypes.toList(growable: false);
-  }
+  static List<String> get supportedTypes =>
+      AudioLoader.supportedTypes.toList(growable: false);
 
   /// The default loading options for the [Sound.load] method.
 
@@ -26,8 +25,8 @@ abstract class Sound {
   ///     var sound = await Sound.load("assets/audio/hello.mp3");
   ///     sound.play();
 
-  static Future<Sound> load(String url, [SoundLoadOptions soundLoadOptions]) {
-    var options = soundLoadOptions ?? Sound.defaultLoadOptions;
+  static Future<Sound> load(String url, [SoundLoadOptions? soundLoadOptions]) {
+    final options = soundLoadOptions ?? Sound.defaultLoadOptions;
     switch (options.engine ?? SoundMixer.engine) {
       case SoundEngine.WebAudioApi:
         return WebAudioApiSound.load(url, options);
@@ -47,8 +46,8 @@ abstract class Sound {
   ///     sound.play();
 
   static Future<Sound> loadDataUrl(String dataUrl,
-      [SoundLoadOptions soundLoadOptions]) {
-    var options = soundLoadOptions ?? Sound.defaultLoadOptions;
+      [SoundLoadOptions? soundLoadOptions]) {
+    final options = soundLoadOptions ?? Sound.defaultLoadOptions;
     switch (options.engine ?? SoundMixer.engine) {
       case SoundEngine.WebAudioApi:
         return WebAudioApiSound.loadDataUrl(dataUrl, options);
@@ -65,8 +64,8 @@ abstract class Sound {
 
   num get length;
 
-  SoundChannel play([bool loop = false, SoundTransform soundTransform]);
+  SoundChannel play([bool loop = false, SoundTransform? soundTransform]);
 
   SoundChannel playSegment(num startTime, num duration,
-      [bool loop = false, SoundTransform soundTransform]);
+      [bool loop = false, SoundTransform? soundTransform]);
 }

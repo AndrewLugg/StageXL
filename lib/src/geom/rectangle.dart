@@ -3,8 +3,8 @@ library stagexl.geom.rectangle;
 import 'dart:math' hide Point, Rectangle;
 import 'dart:math' as math;
 
-import 'point.dart';
 import '../internal/jenkins_hash.dart';
+import 'point.dart';
 
 class Rectangle<T extends num> implements math.MutableRectangle<T> {
   @override
@@ -33,20 +33,19 @@ class Rectangle<T extends num> implements math.MutableRectangle<T> {
   //---------------------------------------------------------------------------
 
   @override
-  bool operator ==(Object other) {
-    return other is math.Rectangle &&
-        left == other.left &&
-        top == other.top &&
-        width == other.width &&
-        height == other.height;
-  }
+  bool operator ==(Object other) =>
+      other is math.Rectangle &&
+      left == other.left &&
+      top == other.top &&
+      width == other.width &&
+      height == other.height;
 
   @override
   int get hashCode {
-    var a = left.hashCode;
-    var b = top.hashCode;
-    var c = width.hashCode;
-    var d = height.hashCode;
+    final a = left.hashCode;
+    final b = top.hashCode;
+    final c = width.hashCode;
+    final d = height.hashCode;
     return JenkinsHash.hash4(a, b, c, d);
   }
 
@@ -57,25 +56,25 @@ class Rectangle<T extends num> implements math.MutableRectangle<T> {
   bool get isEmpty => width <= 0 || height <= 0;
 
   @override
-  T get right => left + width;
+  T get right => left + width as T;
 
   set right(T value) {
-    width = value - left;
+    width = value - left as T;
   }
 
   @override
-  T get bottom => top + height;
+  T get bottom => top + height as T;
 
   set bottom(T value) {
-    height = value - top;
+    height = value - top as T;
   }
 
   @override
   Point<T> get topLeft => Point<T>(left, top);
 
   set topLeft(Point<T> point) {
-    width = width + left - point.x;
-    height = height + top - point.y;
+    width = width + left - point.x as T;
+    height = height + top - point.y as T;
     left = point.x;
     top = point.y;
   }
@@ -84,8 +83,8 @@ class Rectangle<T extends num> implements math.MutableRectangle<T> {
   Point<T> get topRight => Point<T>(right, top);
 
   set topRight(Point<T> point) {
-    width = point.x - left;
-    height = height + top - point.y;
+    width = point.x - left as T;
+    height = height + top - point.y as T;
     top = point.y;
   }
 
@@ -93,8 +92,8 @@ class Rectangle<T extends num> implements math.MutableRectangle<T> {
   Point<T> get bottomLeft => Point<T>(left, bottom);
 
   set bottomLeft(Point<T> point) {
-    width = width + left - point.x;
-    height = point.y - top;
+    width = width + left - point.x as T;
+    height = point.y - top as T;
     left = point.x;
   }
 
@@ -102,8 +101,8 @@ class Rectangle<T extends num> implements math.MutableRectangle<T> {
   Point<T> get bottomRight => Point<T>(right, bottom);
 
   set bottomRight(Point<T> point) {
-    width = point.x - left;
-    height = point.y - top;
+    width = point.x - left as T;
+    height = point.y - top as T;
   }
 
   Point<T> get size => Point<T>(width, height);
@@ -115,40 +114,32 @@ class Rectangle<T extends num> implements math.MutableRectangle<T> {
 
   //---------------------------------------------------------------------------
 
-  bool contains(num px, num py) {
-    return left <= px && top <= py && right > px && bottom > py;
-  }
+  bool contains(num px, num py) =>
+      left <= px && top <= py && right > px && bottom > py;
 
   @override
-  bool containsPoint(math.Point<num> p) {
-    return contains(p.x, p.y);
-  }
+  bool containsPoint(math.Point<num> p) => contains(p.x, p.y);
 
   @override
-  bool intersects(math.Rectangle<num> r) {
-    return left < r.right && right > r.left && top < r.bottom && bottom > r.top;
-  }
+  bool intersects(math.Rectangle<num> r) =>
+      left < r.right && right > r.left && top < r.bottom && bottom > r.top;
 
   /// Returns a rectangle which completely contains `this` and [other].
 
   @override
   Rectangle<T> boundingBox(math.Rectangle<T> other) {
-    var rLeft = min(left, other.left);
-    var rTop = min(top, other.top);
-    var rRight = max(right, other.right);
-    var rBottom = max(bottom, other.bottom);
-    return Rectangle<T>(rLeft, rTop, rRight - rLeft, rBottom - rTop);
+    final rLeft = min(left, other.left);
+    final rTop = min(top, other.top);
+    final rRight = max(right, other.right);
+    final rBottom = max(bottom, other.bottom);
+    return Rectangle<T>(rLeft, rTop, rRight - rLeft as T, rBottom - rTop as T);
   }
 
   /// Tests whether `this` entirely contains [another].
 
   @override
-  bool containsRectangle(math.Rectangle<num> r) {
-    return left <= r.left &&
-        top <= r.top &&
-        right >= r.right &&
-        bottom >= r.bottom;
-  }
+  bool containsRectangle(math.Rectangle<num> r) =>
+      left <= r.left && top <= r.top && right >= r.right && bottom >= r.bottom;
 
   //---------------------------------------------------------------------------
 
@@ -157,8 +148,8 @@ class Rectangle<T extends num> implements math.MutableRectangle<T> {
   }
 
   void inflate(T dx, T dy) {
-    width += dx;
-    height += dy;
+    width = width + dx as T;
+    height = height + dy as T;
   }
 
   void inflatePoint(math.Point<T> p) {
@@ -166,8 +157,8 @@ class Rectangle<T extends num> implements math.MutableRectangle<T> {
   }
 
   void offset(T dx, T dy) {
-    left += dx;
-    top += dy;
+    left = left + dx as T;
+    top = top + dy as T;
   }
 
   void offsetPoint(Point<T> p) {
@@ -183,18 +174,18 @@ class Rectangle<T extends num> implements math.MutableRectangle<T> {
 
   @override
   Rectangle<T> intersection(math.Rectangle<T> rect) {
-    var rLeft = max(left, rect.left);
-    var rTop = max(top, rect.top);
-    var rRight = min(right, rect.right);
-    var rBottom = min(bottom, rect.bottom);
-    return Rectangle<T>(rLeft, rTop, rRight - rLeft, rBottom - rTop);
+    final rLeft = max(left, rect.left);
+    final rTop = max(top, rect.top);
+    final rRight = min(right, rect.right);
+    final rBottom = min(bottom, rect.bottom);
+    return Rectangle<T>(rLeft, rTop, rRight - rLeft as T, rBottom - rTop as T);
   }
 
   Rectangle<int> align() {
-    var rLeft = left.floor();
-    var rTop = top.floor();
-    var rRight = right.ceil();
-    var rBottom = bottom.ceil();
+    final rLeft = left.floor();
+    final rTop = top.floor();
+    final rRight = right.ceil();
+    final rBottom = bottom.ceil();
     return Rectangle<int>(rLeft, rTop, rRight - rLeft, rBottom - rTop);
   }
 }

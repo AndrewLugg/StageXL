@@ -2,8 +2,10 @@ part of stagexl.engine;
 
 abstract class RenderProgram {
   int _contextIdentifier = -1;
-  gl.RenderingContext _renderingContext;
-  gl.Program _program;
+
+  // These assume activate() is called
+  late gl.RenderingContext _renderingContext;
+  late gl.Program _program;
 
   final Map<String, int> _attributes;
   final Map<String, gl.UniformLocation> _uniforms;
@@ -36,7 +38,7 @@ abstract class RenderProgram {
   //---------------------------------------------------------------------------
 
   set projectionMatrix(Matrix3D matrix) {
-    var location = uniforms['uProjectionMatrix'];
+    final location = uniforms['uProjectionMatrix'];
     renderingContext.uniformMatrix4fv(location, false, matrix.data);
   }
 
@@ -63,7 +65,7 @@ abstract class RenderProgram {
 
   void flush() {
     if (renderBufferIndex.position > 0 && renderBufferVertex.position > 0) {
-      var count = renderBufferIndex.position;
+      final count = renderBufferIndex.position;
       renderBufferIndex.update();
       renderBufferIndex.position = 0;
       renderBufferIndex.count = 0;
@@ -80,45 +82,47 @@ abstract class RenderProgram {
   //---------------------------------------------------------------------------
 
   gl.Program _createProgram(gl.RenderingContext rc) {
-    var program = rc.createProgram();
-    var vShader = _createShader(rc, vertexShaderSource, gl.WebGL.VERTEX_SHADER);
-    var fShader =
+    final program = rc.createProgram();
+    final vShader =
+        _createShader(rc, vertexShaderSource, gl.WebGL.VERTEX_SHADER);
+    final fShader =
         _createShader(rc, fragmentShaderSource, gl.WebGL.FRAGMENT_SHADER);
 
     rc.attachShader(program, vShader);
     rc.attachShader(program, fShader);
     rc.linkProgram(program);
 
-    var status = rc.getProgramParameter(program, gl.WebGL.LINK_STATUS);
+    final status = rc.getProgramParameter(program, gl.WebGL.LINK_STATUS);
     if (status == true) return program;
 
-    var cl = rc.isContextLost();
-    throw StateError(cl ? 'ContextLost' : rc.getProgramInfoLog(program));
+    final cl = rc.isContextLost();
+    throw StateError(cl ? 'ContextLost' : rc.getProgramInfoLog(program)!);
   }
 
   //---------------------------------------------------------------------------
 
   gl.Shader _createShader(gl.RenderingContext rc, String source, int type) {
-    var shader = rc.createShader(type);
+    final shader = rc.createShader(type);
     rc.shaderSource(shader, source);
     rc.compileShader(shader);
 
-    var status = rc.getShaderParameter(shader, gl.WebGL.COMPILE_STATUS);
+    final status = rc.getShaderParameter(shader, gl.WebGL.COMPILE_STATUS);
     if (status == true) return shader;
 
-    var cl = rc.isContextLost();
-    throw StateError(cl ? 'ContextLost' : rc.getShaderInfoLog(shader));
+    final cl = rc.isContextLost();
+    throw StateError(cl ? 'ContextLost' : rc.getShaderInfoLog(shader)!);
   }
 
   //---------------------------------------------------------------------------
 
   void _updateAttributes(gl.RenderingContext rc, gl.Program program) {
     _attributes.clear();
-    int count = rc.getProgramParameter(program, gl.WebGL.ACTIVE_ATTRIBUTES);
+    final count =
+        rc.getProgramParameter(program, gl.WebGL.ACTIVE_ATTRIBUTES) as int;
 
     for (var i = 0; i < count; i++) {
-      var activeInfo = rc.getActiveAttrib(program, i);
-      var location = rc.getAttribLocation(program, activeInfo.name);
+      final activeInfo = rc.getActiveAttrib(program, i);
+      final location = rc.getAttribLocation(program, activeInfo.name);
       rc.enableVertexAttribArray(location);
       _attributes[activeInfo.name] = location;
     }
@@ -128,11 +132,12 @@ abstract class RenderProgram {
 
   void _updateUniforms(gl.RenderingContext rc, gl.Program program) {
     _uniforms.clear();
-    int count = rc.getProgramParameter(program, gl.WebGL.ACTIVE_UNIFORMS);
+    final count =
+        rc.getProgramParameter(program, gl.WebGL.ACTIVE_UNIFORMS) as int;
 
     for (var i = 0; i < count; i++) {
-      var activeInfo = rc.getActiveUniform(program, i);
-      var location = rc.getUniformLocation(program, activeInfo.name);
+      final activeInfo = rc.getActiveUniform(program, i);
+      final location = rc.getUniformLocation(program, activeInfo.name);
       _uniforms[activeInfo.name] = location;
     }
   }

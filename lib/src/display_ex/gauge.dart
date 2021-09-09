@@ -45,15 +45,11 @@ class Gauge extends DisplayObject {
   //---------------------------------------------------------------------------
 
   @override
-  Rectangle<num> get bounds {
-    return bitmapData == null
-        ? Rectangle<num>(0.0, 0.0, 0.0, 0.0)
-        : Rectangle<num>(0.0, 0.0, bitmapData.width, bitmapData.height);
-  }
+  Rectangle<num> get bounds =>
+      Rectangle<num>(0.0, 0.0, bitmapData.width, bitmapData.height);
 
   @override
-  DisplayObject hitTestInput(num localX, num localY) {
-    if (bitmapData == null) return null;
+  DisplayObject? hitTestInput(num localX, num localY) {
     if (localX < 0.0 || localX >= bitmapData.width) return null;
     if (localY < 0.0 || localY >= bitmapData.height) return null;
     return this;
@@ -61,25 +57,21 @@ class Gauge extends DisplayObject {
 
   @override
   void render(RenderState renderState) {
-    if (bitmapData != null) {
-      var renderTextureQuad = _getRenderTextureQuad();
-      renderState.renderTextureQuad(renderTextureQuad);
-    }
+    final renderTextureQuad = _getRenderTextureQuad();
+    renderState.renderTextureQuad(renderTextureQuad);
   }
 
   @override
   void renderFiltered(RenderState renderState) {
-    if (bitmapData != null) {
-      var renderTextureQuad = _getRenderTextureQuad();
-      renderState.renderTextureQuadFiltered(renderTextureQuad, filters);
-    }
+    final renderTextureQuad = _getRenderTextureQuad();
+    renderState.renderTextureQuadFiltered(renderTextureQuad, filters);
   }
 
   //---------------------------------------------------------------------------
 
   RenderTextureQuad _getRenderTextureQuad() {
-    var width = bitmapData.width;
-    var height = bitmapData.height;
+    final width = bitmapData.width;
+    final height = bitmapData.height;
     var left = 0;
     var top = 0;
     var right = width;
@@ -90,8 +82,8 @@ class Gauge extends DisplayObject {
     if (direction == DIRECTION_RIGHT) right = (_ratio * width).round();
     if (direction == DIRECTION_DOWN) bottom = (_ratio * height).round();
 
-    var rectangle = Rectangle(left, top, right - left, bottom - top);
-    var renderTextureQuad = bitmapData.renderTextureQuad.clip(rectangle);
+    final rectangle = Rectangle(left, top, right - left, bottom - top);
+    final renderTextureQuad = bitmapData.renderTextureQuad.clip(rectangle);
 
     return renderTextureQuad;
   }

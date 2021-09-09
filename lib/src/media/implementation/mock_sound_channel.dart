@@ -1,18 +1,18 @@
 part of stagexl.media;
 
 class MockSoundChannel extends SoundChannel {
-  MockSound _mockSound;
+  final MockSound _mockSound;
   bool _stopped = false;
   bool _paused = false;
   bool _loop = false;
 
-  SoundTransform _soundTransform;
+  late SoundTransform _soundTransform;
 
-  MockSoundChannel(MockSound mockSound, num startTime, num duration, bool loop,
-      SoundTransform soundTransform) {
+  MockSoundChannel(MockSound mockSound, bool loop,
+      [SoundTransform? soundTransform])
+      : _mockSound = mockSound {
     soundTransform ??= SoundTransform();
 
-    _mockSound = mockSound;
     _soundTransform = soundTransform;
     _loop = loop;
   }
@@ -33,16 +33,12 @@ class MockSoundChannel extends SoundChannel {
   Sound get sound => _mockSound;
 
   @override
-  set position(num value) {
-    return;
-  }
+  set position(num value) => Never;
 
   //---------------------------------------------------------------------------
 
   @override
-  bool get paused {
-    return _paused;
-  }
+  bool get paused => _paused;
 
   @override
   set paused(bool value) {
@@ -50,9 +46,7 @@ class MockSoundChannel extends SoundChannel {
   }
 
   @override
-  SoundTransform get soundTransform {
-    return _soundTransform;
-  }
+  SoundTransform get soundTransform => _soundTransform;
 
   @override
   set soundTransform(SoundTransform value) {

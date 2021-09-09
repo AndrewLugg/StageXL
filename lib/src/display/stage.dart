@@ -53,10 +53,10 @@ enum StageAlign {
 class Stage extends DisplayObjectContainer {
   static StageOptions defaultOptions = StageOptions();
 
-  CanvasElement _canvas;
-  RenderContext _renderContext;
-  RenderLoop _renderLoop;
-  StageConsole _console;
+  late CanvasElement _canvas;
+  late final RenderContext _renderContext;
+  RenderLoop? _renderLoop;
+  late final StageConsole _console;
 
   int _sourceWidth = 0;
   int _sourceHeight = 0;
@@ -76,7 +76,7 @@ class Stage extends DisplayObjectContainer {
   final Matrix _consoleTransformation = Matrix.fromIdentity();
   final RenderEvent _renderEvent = RenderEvent();
 
-  RenderState _renderState;
+  late RenderState _renderState;
   InputEventMode _inputEventMode = InputEventMode.MouseOnly;
   StageRenderMode _stageRenderMode = StageRenderMode.AUTO;
   StageScaleMode _stageScaleMode = StageScaleMode.SHOW_ALL;
@@ -84,7 +84,7 @@ class Stage extends DisplayObjectContainer {
 
   String _mouseCursor = MouseCursor.DEFAULT;
   Point<num> _mousePosition = Point<num>(0.0, 0.0);
-  InteractiveObject _mouseTarget;
+  InteractiveObject? _mouseTarget;
 
   final List<_Drag> _drags = <_Drag>[];
   final Map<int, _TouchPoint> _touchPoints = <int, _TouchPoint>{};
@@ -100,7 +100,7 @@ class Stage extends DisplayObjectContainer {
 
   /// The interactive object with keyboard focus or null if focus is not set.
 
-  InteractiveObject focus;
+  InteractiveObject? focus;
 
   /// Gets and sets the background color of this Stage.
 
@@ -131,16 +131,18 @@ class Stage extends DisplayObjectContainer {
       EventStreamProvider<Event>(Event.MOUSE_LEAVE);
 
   EventStream<Event> get onResize => Stage.resizeEvent.forTarget(this);
+
   EventStream<Event> get onMouseLeave => Stage.mouseLeaveEvent.forTarget(this);
 
   //----------------------------------------------------------------------------
 
-  Stage(CanvasElement canvas, {int width, int height, StageOptions options}) {
-    if (canvas.tabIndex <= 0) canvas.tabIndex = 1;
+  Stage(CanvasElement canvas,
+      {int? width, int? height, StageOptions? options}) {
+    if (canvas.tabIndex! <= 0) canvas.tabIndex = 1;
     if (canvas.style.outline == '') canvas.style.outline = 'none';
     options ??= Stage.defaultOptions;
-    width ??= canvas.width;
-    height ??= canvas.height;
+    width ??= canvas.width!;
+    height ??= canvas.height!;
 
     backgroundColor = options.backgroundColor;
     preventDefaultOnTouch = options.preventDefaultOnTouch;
@@ -154,9 +156,9 @@ class Stage extends DisplayObjectContainer {
     _stageRenderMode = options.stageRenderMode;
     _inputEventMode = options.inputEventMode;
 
-    _sourceWidth = ensureInt(width);
-    _sourceHeight = ensureInt(height);
-    _pixelRatio = minNum(options.maxPixelRatio, env.devicePixelRatio);
+    _sourceWidth = width;
+    _sourceHeight = height;
+    _pixelRatio = min(options.maxPixelRatio, env.devicePixelRatio);
     _renderContext = _createRenderContext(canvas, options);
     _renderState = RenderState(_renderContext);
     _console = StageConsole()..visible = false;
@@ -167,7 +169,7 @@ class Stage extends DisplayObjectContainer {
     canvas.onKeyUp.listen(_onKeyEvent);
     canvas.onKeyPress.listen(_onKeyEvent);
 
-    var listenToMouseEvents = _inputEventMode == InputEventMode.MouseOnly ||
+    final listenToMouseEvents = _inputEventMode == InputEventMode.MouseOnly ||
         _inputEventMode == InputEventMode.MouseAndTouch;
 
     if (listenToMouseEvents) {
@@ -179,7 +181,7 @@ class Stage extends DisplayObjectContainer {
       canvas.onMouseWheel.listen(_onMouseWheelEvent);
     }
 
-    var listenToTouchEvents = _inputEventMode == InputEventMode.TouchOnly ||
+    final listenToTouchEvents = _inputEventMode == InputEventMode.TouchOnly ||
         _inputEventMode == InputEventMode.MouseAndTouch;
 
     if (listenToTouchEvents) {
@@ -210,7 +212,7 @@ class Stage extends DisplayObjectContainer {
   /// Gets the [RenderLoop] where this Stage was added to, or
   /// NULL in case this Stage is not added to a [RenderLoop].
 
-  RenderLoop get renderLoop => _renderLoop;
+  RenderLoop? get renderLoop => _renderLoop;
 
   /// Gets the [StageConsole] to show render information about the previous
   /// frame as well as other custom information.
@@ -243,7 +245,7 @@ class Stage extends DisplayObjectContainer {
   int get sourceWidth => _sourceWidth;
 
   set sourceWidth(int value) {
-    _sourceWidth = ensureInt(value);
+    _sourceWidth = value;
     _updateCanvasSize();
   }
 
@@ -254,7 +256,7 @@ class Stage extends DisplayObjectContainer {
   int get sourceHeight => _sourceHeight;
 
   set sourceHeight(int value) {
-    _sourceHeight = ensureInt(value);
+    _sourceHeight = value;
     _updateCanvasSize();
   }
 
@@ -263,7 +265,7 @@ class Stage extends DisplayObjectContainer {
   num get pixelRatio => _pixelRatio;
 
   set pixelRatio(num value) {
-    _pixelRatio = ensureNum(value);
+    _pixelRatio = value;
     _updateCanvasSize();
   }
 
@@ -368,7 +370,7 @@ class Stage extends DisplayObjectContainer {
 
   @override
   DisplayObject hitTestInput(num localX, num localY) {
-    var target = super.hitTestInput(localX, localY);
+    final target = super.hitTestInput(localX, localY);
     return target ?? this;
   }
 
@@ -391,7 +393,7 @@ class Stage extends DisplayObjectContainer {
     if (_stageRenderMode == StageRenderMode.AUTO ||
         _stageRenderMode == StageRenderMode.AUTO_INVALID && _invalid ||
         _stageRenderMode == StageRenderMode.ONCE) {
-      var stopwatch = Stopwatch()..start();
+      final stopwatch = Stopwatch()..start();
 
       _updateCanvasSize();
       _renderEvent.dispatch();
@@ -399,14 +401,14 @@ class Stage extends DisplayObjectContainer {
       _renderContext.renderStatistics.reset();
       _renderContext.clear(backgroundColor);
       _renderState.reset(_stageTransformation);
-      _renderState.currentTime = ensureNum(currentTime);
-      _renderState.deltaTime = ensureNum(deltaTime);
+      _renderState.currentTime = currentTime;
+      _renderState.deltaTime = deltaTime;
       _renderState.renderObject(this);
       _renderState.flush();
       _invalid = false;
 
-      var stats = _renderContext.renderStatistics;
-      var frameTime = stopwatch.elapsedMilliseconds;
+      final stats = _renderContext.renderStatistics;
+      final frameTime = stopwatch.elapsedMilliseconds;
       _avgDrawCalls = _avgDrawCalls * 0.75 + stats.drawCount * 0.25;
       _avgVertexCount = _avgVertexCount * 0.75 + stats.vertexCount * 0.25;
       _avgIdexCount = _avgIdexCount * 0.75 + stats.indexCount * 0.25;
@@ -454,8 +456,8 @@ class Stage extends DisplayObjectContainer {
   //----------------------------------------------------------------------------
 
   void _startDrag(Sprite sprite, Point<num> globalPoint, Point<num> anchorPoint,
-      Rectangle<num> bounds, int touchPointID) {
-    var drag = _Drag(this, sprite, anchorPoint, bounds, touchPointID);
+      Rectangle<num>? bounds, int touchPointID) {
+    final drag = _Drag(this, sprite, anchorPoint, bounds, touchPointID);
     drag.update(touchPointID, globalPoint);
 
     _drags.removeWhere(
@@ -472,12 +474,12 @@ class Stage extends DisplayObjectContainer {
   void _updateCanvasSize() {
     var clientLeft = 0, clientTop = 0;
     var clientWidth = 0, clientHeight = 0;
-    var sourceWidth = _sourceWidth;
-    var sourceHeight = _sourceHeight;
+    final sourceWidth = _sourceWidth;
+    final sourceHeight = _sourceHeight;
 
-    var clientRectangle = _canvas.getBoundingClientRect();
-    clientLeft = _canvas.clientLeft + clientRectangle.left.round();
-    clientTop = _canvas.clientTop + clientRectangle.top.round();
+    final clientRectangle = _canvas.getBoundingClientRect();
+    clientLeft = _canvas.clientLeft! + clientRectangle.left.round();
+    clientTop = _canvas.clientTop! + clientRectangle.top.round();
     clientWidth = _canvas.clientWidth;
     clientHeight = _canvas.clientHeight;
 
@@ -489,8 +491,8 @@ class Stage extends DisplayObjectContainer {
     var scaleY = 1.0;
     var pivotX = 0.0;
     var pivotY = 0.0;
-    var ratioWidth = clientWidth / sourceWidth;
-    var ratioHeight = clientHeight / sourceHeight;
+    final ratioWidth = clientWidth / sourceWidth;
+    final ratioHeight = clientHeight / sourceHeight;
 
     switch (_stageScaleMode) {
       case StageScaleMode.EXACT_FIT:
@@ -522,7 +524,7 @@ class Stage extends DisplayObjectContainer {
       case StageAlign.TOP_RIGHT:
       case StageAlign.RIGHT:
       case StageAlign.BOTTOM_RIGHT:
-        pivotX = (clientWidth - sourceWidth * scaleX);
+        pivotX = clientWidth - sourceWidth * scaleX;
         break;
     }
 
@@ -540,7 +542,7 @@ class Stage extends DisplayObjectContainer {
       case StageAlign.BOTTOM_LEFT:
       case StageAlign.BOTTOM:
       case StageAlign.BOTTOM_RIGHT:
-        pivotY = (clientHeight - sourceHeight * scaleY);
+        pivotY = clientHeight - sourceHeight * scaleY;
         break;
     }
 
@@ -587,12 +589,12 @@ class Stage extends DisplayObjectContainer {
   //----------------------------------------------------------------------------
 
   void _updateMouseCursor() {
-    var mouseTarget = _mouseTarget;
+    final mouseTarget = _mouseTarget;
     var mouseCursor = Mouse.cursor;
 
     if (mouseTarget != null && mouseCursor == MouseCursor.AUTO) {
-      var mc = mouseTarget.mouseCursor;
-      if (mc != null && mc != MouseCursor.AUTO) mouseCursor = mc;
+      final mc = mouseTarget.mouseCursor;
+      if (mc != MouseCursor.AUTO) mouseCursor = mc;
     }
 
     if (mouseCursor == MouseCursor.AUTO) {
@@ -610,17 +612,17 @@ class Stage extends DisplayObjectContainer {
   void _onMouseEvent(html.MouseEvent event) {
     if (preventDefaultOnMouse) event.preventDefault();
 
-    var time = DateTime.now().millisecondsSinceEpoch;
-    var button = event.button;
+    final time = DateTime.now().millisecondsSinceEpoch;
+    final button = event.button;
 
-    InteractiveObject target;
-    var stagePoint = _clientTransformation.transformPoint(event.client);
-    var localPoint = Point<num>(0.0, 0.0);
+    InteractiveObject? target;
+    final stagePoint = _clientTransformation.transformPoint(event.client);
+    final localPoint = Point<num>(0.0, 0.0);
 
     if (button < 0 || button > 2) return;
     if (event.type == 'mousemove' && _mousePosition == stagePoint) return;
 
-    var mouseButton = _mouseButtons[button];
+    final mouseButton = _mouseButtons[button];
     _mousePosition = stagePoint;
     _drags.forEach((d) => d.update(0, stagePoint));
 
@@ -634,25 +636,25 @@ class Stage extends DisplayObjectContainer {
     // MOUSE_OUT, ROLL_OUT, ROLL_OVER, MOUSE_OVER
 
     if (_mouseTarget != target) {
-      var oldTarget = _mouseTarget;
-      var newTarget = target;
-      var oldTargetList = <DisplayObject>[];
-      var newTargetList = <DisplayObject>[];
+      final oldTarget = _mouseTarget;
+      final newTarget = target;
+      final oldTargetList = <DisplayObject>[];
+      final newTargetList = <DisplayObject>[];
       var commonCount = 0;
 
-      for (DisplayObject p = oldTarget; p != null; p = p.parent) {
+      for (DisplayObject? p = oldTarget; p != null; p = p.parent) {
         oldTargetList.add(p);
       }
 
-      for (DisplayObject p = newTarget; p != null; p = p.parent) {
+      for (DisplayObject? p = newTarget; p != null; p = p.parent) {
         newTargetList.add(p);
       }
 
       for (;; commonCount++) {
         if (commonCount == oldTargetList.length) break;
         if (commonCount == newTargetList.length) break;
-        var ot = oldTargetList[oldTargetList.length - commonCount - 1];
-        var nt = newTargetList[newTargetList.length - commonCount - 1];
+        final ot = oldTargetList[oldTargetList.length - commonCount - 1];
+        final nt = newTargetList[newTargetList.length - commonCount - 1];
         if (ot != nt) break;
       }
 
@@ -675,7 +677,7 @@ class Stage extends DisplayObjectContainer {
       }
 
       for (var i = 0; i < oldTargetList.length - commonCount; i++) {
-        var target = oldTargetList[i];
+        final target = oldTargetList[i];
         target.globalToLocal(stagePoint, localPoint);
         target.dispatchEvent(MouseEvent(
             MouseEvent.ROLL_OUT,
@@ -694,7 +696,7 @@ class Stage extends DisplayObjectContainer {
       }
 
       for (var i = newTargetList.length - commonCount - 1; i >= 0; i--) {
-        var target = newTargetList[i];
+        final target = newTargetList[i];
         target.globalToLocal(stagePoint, localPoint);
         target.dispatchEvent(MouseEvent(
             MouseEvent.ROLL_OVER,
@@ -738,7 +740,7 @@ class Stage extends DisplayObjectContainer {
     //-----------------------------------------------------------------
     // MOUSE_DOWN, MOUSE_MOVE, MOUSE_UP, CLICK, DOUBLE_CLICK
 
-    String mouseEventType;
+    String? mouseEventType;
     var isClick = false;
     var isDoubleClick = false;
 
@@ -759,7 +761,7 @@ class Stage extends DisplayObjectContainer {
     if (event.type == 'mouseup') {
       mouseEventType = mouseButton.mouseUpEventType;
       mouseButton.buttonDown = false;
-      isClick = (mouseButton.target == target);
+      isClick = mouseButton.target == target;
       isDoubleClick = isClick &&
           mouseButton.clickCount.isEven &&
           (time < mouseButton.clickTime + 500);
@@ -820,15 +822,14 @@ class Stage extends DisplayObjectContainer {
   void _onMouseWheelEvent(html.WheelEvent event) {
     if (preventDefaultOnWheel) event.preventDefault();
 
-    var stagePoint = _clientTransformation.transformPoint(event.client);
-    var localPoint = Point<num>(0.0, 0.0);
+    final stagePoint = _clientTransformation.transformPoint(event.client);
+    final localPoint = Point<num>(0.0, 0.0);
 
-    var target = hitTestInput(stagePoint.x, stagePoint.y) as InteractiveObject;
-    if (target == null) return;
-
+    final target =
+        hitTestInput(stagePoint.x, stagePoint.y) as InteractiveObject;
     target.globalToLocal(stagePoint, localPoint);
 
-    var mouseEvent = MouseEvent(
+    final mouseEvent = MouseEvent(
         MouseEvent.MOUSE_WHEEL,
         true,
         localPoint.x,
@@ -862,24 +863,29 @@ class Stage extends DisplayObjectContainer {
   void _onTouchEvent(html.TouchEvent event) {
     if (preventDefaultOnTouch) event.preventDefault();
 
-    var eventType = event.type;
-    var altKey = event.altKey;
-    var ctrlKey = event.ctrlKey;
-    var shiftKey = event.shiftKey;
+    final eventType = event.type;
+    final altKey = event.altKey;
+    final ctrlKey = event.ctrlKey;
+    final shiftKey = event.shiftKey;
 
-    for (var changedTouch in event.changedTouches) {
-      var identifier = changedTouch.identifier;
-      var clientPoint = changedTouch.client;
-      var stagePoint = _clientTransformation.transformPoint(clientPoint);
-      var localPoint = Point<num>(0.0, 0.0);
-      var target =
+    if (event.changedTouches == null) return;
+
+    final touches =
+        event.changedTouches!.where((touch) => touch.identifier != null);
+    for (var changedTouch in touches) {
+      final identifier = changedTouch.identifier!;
+
+      final clientPoint = changedTouch.client;
+      final stagePoint = _clientTransformation.transformPoint(clientPoint);
+      final localPoint = Point<num>(0.0, 0.0);
+      final target =
           hitTestInput(stagePoint.x, stagePoint.y) as InteractiveObject;
 
-      var touchPoint = _touchPoints.putIfAbsent(
+      final touchPoint = _touchPoints.putIfAbsent(
           identifier, () => _TouchPoint(target, _touchPoints.isEmpty));
 
-      var touchPointID = touchPoint.touchPointID;
-      var primaryTouchPoint = touchPoint.primaryTouchPoint;
+      final touchPointID = touchPoint.touchPointID;
+      final primaryTouchPoint = touchPoint.primaryTouchPoint;
 
       _drags.forEach((d) => d.update(touchPointID, stagePoint));
 
@@ -887,46 +893,44 @@ class Stage extends DisplayObjectContainer {
       // TOUCH_OUT, TOUCH_ROLL_OUT, TOUCH_ROLL_OVER, TOUCH_OVER
 
       if (touchPoint.currentTarget != target) {
-        var oldTarget = touchPoint.currentTarget;
-        var newTarget = target;
-        var oldTargetList = <DisplayObject>[];
-        var newTargetList = <DisplayObject>[];
+        final oldTarget = touchPoint.currentTarget;
+        final newTarget = target;
+        final oldTargetList = <DisplayObject>[];
+        final newTargetList = <DisplayObject>[];
         var commonCount = 0;
 
-        for (DisplayObject p = oldTarget; p != null; p = p.parent) {
+        for (DisplayObject? p = oldTarget; p != null; p = p.parent) {
           oldTargetList.add(p);
         }
 
-        for (DisplayObject p = newTarget; p != null; p = p.parent) {
+        for (DisplayObject? p = newTarget; p != null; p = p.parent) {
           newTargetList.add(p);
         }
 
         for (;; commonCount++) {
           if (commonCount == oldTargetList.length) break;
           if (commonCount == newTargetList.length) break;
-          var ot = oldTargetList[oldTargetList.length - commonCount - 1];
-          var nt = newTargetList[newTargetList.length - commonCount - 1];
+          final ot = oldTargetList[oldTargetList.length - commonCount - 1];
+          final nt = newTargetList[newTargetList.length - commonCount - 1];
           if (ot != nt) break;
         }
 
-        if (oldTarget != null) {
-          oldTarget.globalToLocal(stagePoint, localPoint);
-          oldTarget.dispatchEvent(TouchEvent(
-              TouchEvent.TOUCH_OUT,
-              true,
-              localPoint.x,
-              localPoint.y,
-              stagePoint.x,
-              stagePoint.y,
-              altKey,
-              ctrlKey,
-              shiftKey,
-              touchPointID,
-              primaryTouchPoint));
-        }
+        oldTarget.globalToLocal(stagePoint, localPoint);
+        oldTarget.dispatchEvent(TouchEvent(
+            TouchEvent.TOUCH_OUT,
+            true,
+            localPoint.x,
+            localPoint.y,
+            stagePoint.x,
+            stagePoint.y,
+            altKey,
+            ctrlKey,
+            shiftKey,
+            touchPointID,
+            primaryTouchPoint));
 
         for (var i = 0; i < oldTargetList.length - commonCount; i++) {
-          var target = oldTargetList[i];
+          final target = oldTargetList[i];
           target.globalToLocal(stagePoint, localPoint);
           target.dispatchEvent(TouchEvent(
               TouchEvent.TOUCH_ROLL_OUT,
@@ -943,7 +947,7 @@ class Stage extends DisplayObjectContainer {
         }
 
         for (var i = newTargetList.length - commonCount - 1; i >= 0; i--) {
-          var target = newTargetList[i];
+          final target = newTargetList[i];
           target.globalToLocal(stagePoint, localPoint);
           target.dispatchEvent(TouchEvent(
               TouchEvent.TOUCH_ROLL_OVER,
@@ -959,21 +963,19 @@ class Stage extends DisplayObjectContainer {
               primaryTouchPoint));
         }
 
-        if (newTarget != null) {
-          newTarget.globalToLocal(stagePoint, localPoint);
-          newTarget.dispatchEvent(TouchEvent(
-              TouchEvent.TOUCH_OVER,
-              true,
-              localPoint.x,
-              localPoint.y,
-              stagePoint.x,
-              stagePoint.y,
-              altKey,
-              ctrlKey,
-              shiftKey,
-              touchPointID,
-              primaryTouchPoint));
-        }
+        newTarget.globalToLocal(stagePoint, localPoint);
+        newTarget.dispatchEvent(TouchEvent(
+            TouchEvent.TOUCH_OVER,
+            true,
+            localPoint.x,
+            localPoint.y,
+            stagePoint.x,
+            stagePoint.y,
+            altKey,
+            ctrlKey,
+            shiftKey,
+            touchPointID,
+            primaryTouchPoint));
 
         touchPoint.currentTarget = newTarget;
       }
@@ -981,7 +983,7 @@ class Stage extends DisplayObjectContainer {
       //---------------------------------------------------------------
       // TOUCH_BEGIN, TOUCH_MOVE, TOUCH_END, TOUCH_CANCEL, TOUCH_TAP
 
-      String touchEventType;
+      String? touchEventType;
       var isTap = false;
 
       if (eventType == 'touchstart') {
@@ -993,7 +995,7 @@ class Stage extends DisplayObjectContainer {
       if (eventType == 'touchend') {
         _touchPoints.remove(identifier);
         touchEventType = TouchEvent.TOUCH_END;
-        isTap = (touchPoint.target == target);
+        isTap = touchPoint.target == target;
       }
 
       if (eventType == 'touchcancel') {
@@ -1005,7 +1007,7 @@ class Stage extends DisplayObjectContainer {
         touchEventType = TouchEvent.TOUCH_MOVE;
       }
 
-      if (touchEventType != null && target != null) {
+      if (touchEventType != null) {
         target.globalToLocal(stagePoint, localPoint);
         target.dispatchEvent(TouchEvent(
             touchEventType,
@@ -1047,14 +1049,14 @@ class Stage extends DisplayObjectContainer {
 
     if (event.type == 'keypress') {
       var charCode = event.charCode;
-      var keyCode = event.keyCode;
+      final keyCode = event.keyCode;
       if (keyCode == 13) charCode = 13;
       if (charCode == 0) return;
 
-      var text = String.fromCharCodes([charCode]);
-      var textEvent = TextEvent(TextEvent.TEXT_INPUT, true, text);
+      final text = String.fromCharCodes([charCode]);
+      final textEvent = TextEvent(TextEvent.TEXT_INPUT, true, text);
 
-      focus.dispatchEvent(textEvent);
+      focus!.dispatchEvent(textEvent);
 
       if (textEvent.isImmediatePropagationStopped) {
         event.stopImmediatePropagation();
@@ -1091,10 +1093,16 @@ class Stage extends DisplayObjectContainer {
         keyLocation = KeyLocation.D_PAD;
       }
 
-      var keyboardEvent = KeyboardEvent(keyboardEventType, true, event.keyCode,
-          keyLocation, event.altKey, event.ctrlKey, event.shiftKey);
+      final keyboardEvent = KeyboardEvent(
+          keyboardEventType,
+          true,
+          event.keyCode,
+          keyLocation,
+          event.altKey,
+          event.ctrlKey,
+          event.shiftKey);
 
-      focus.dispatchEvent(keyboardEvent);
+      focus!.dispatchEvent(keyboardEvent);
 
       if (keyboardEvent.isImmediatePropagationStopped) {
         event.stopImmediatePropagation();

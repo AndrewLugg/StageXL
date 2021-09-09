@@ -30,16 +30,15 @@ class VideoObject extends InteractiveObject {
   EventStream<Event> get onError => VideoObject.errorEvent.forTarget(this);
   EventStream<Event> get onPlay => VideoObject.playEvent.forTarget(this);
 
-  Video _video;
-  RenderTexture _renderTexture;
-  RenderTextureQuad _renderTextureQuad;
+  final Video _video;
+  final RenderTexture _renderTexture;
+  late final RenderTextureQuad _renderTextureQuad;
 
-  VideoObject(Video video, [bool autoplay = false]) {
-    _video = video;
-    _renderTexture = RenderTexture.fromVideoElement(video.videoElement);
+  VideoObject(this._video, [bool autoplay = false])
+      : _renderTexture = RenderTexture.fromVideoElement(_video.videoElement) {
     _renderTextureQuad = _renderTexture.quad;
 
-    var videoElement = video.videoElement;
+    final videoElement = _video.videoElement;
     videoElement.onEnded.listen((e) => dispatchEvent(Event('videoEnded')));
     videoElement.onPause.listen((e) => dispatchEvent(Event('videoPause')));
     videoElement.onError.listen((e) => dispatchEvent(Event('videoError')));
@@ -58,8 +57,8 @@ class VideoObject extends InteractiveObject {
 
   @override
   Rectangle<num> get bounds {
-    var width = _renderTextureQuad.targetWidth;
-    var height = _renderTextureQuad.targetHeight;
+    final width = _renderTextureQuad.targetWidth;
+    final height = _renderTextureQuad.targetHeight;
     return Rectangle<num>(0.0, 0.0, width, height);
   }
 

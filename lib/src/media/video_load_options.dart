@@ -25,7 +25,7 @@ class VideoLoadOptions {
   /// browser. If this value is null, the alternative urls are calcualted
   /// automatically based on the mp3, mp4, ogg, ac3 and wav properties.
 
-  List<String> alternativeUrls;
+  List<String>? alternativeUrls;
 
   /// Do not stream the video but download the video file as a whole.
   /// A DataUrl string will be used for the VideoElement source.
@@ -42,8 +42,8 @@ class VideoLoadOptions {
   /// Create a deep clone of this [VideoLoadOptions].
 
   VideoLoadOptions clone() {
-    var options = VideoLoadOptions();
-    var urls = alternativeUrls;
+    final options = VideoLoadOptions();
+    final urls = alternativeUrls;
     options.mp4 = mp4;
     options.webm = webm;
     options.ogg = ogg;
@@ -59,21 +59,20 @@ class VideoLoadOptions {
   /// based on the supported types and formats available.
 
   List<String> getOptimalVideoUrls(String primaryUrl) {
-    var availableTypes = VideoLoader.supportedTypes.toList();
+    final availableTypes = VideoLoader.supportedTypes.toList();
     if (!webm) availableTypes.remove('webm');
     if (!mp4) availableTypes.remove('mp4');
     if (!ogg) availableTypes.remove('ogg');
 
-    var urls = <String>[];
-    var regex =
-        RegExp(r'([A-Za-z0-9]+)$', multiLine: false, caseSensitive: true);
-    var primaryMatch = regex.firstMatch(primaryUrl);
+    final urls = <String>[];
+    final regex = RegExp(r'([A-Za-z0-9]+)$');
+    final primaryMatch = regex.firstMatch(primaryUrl);
     if (primaryMatch == null) return urls;
     if (availableTypes.remove(primaryMatch.group(1))) urls.add(primaryUrl);
 
     if (alternativeUrls != null) {
-      for (var alternativeUrl in alternativeUrls) {
-        var alternativeMatch = regex.firstMatch(alternativeUrl);
+      for (var alternativeUrl in alternativeUrls!) {
+        final alternativeMatch = regex.firstMatch(alternativeUrl);
         if (alternativeMatch == null) continue;
         if (availableTypes.contains(alternativeMatch.group(1))) {
           urls.add(alternativeUrl);

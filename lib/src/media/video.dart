@@ -75,13 +75,13 @@ class Video {
   /// for the ResourceManager.addVideo method.
 
   static Future<Video> load(String url,
-      [VideoLoadOptions videoLoadOptions]) async {
-    var options = videoLoadOptions ?? Video.defaultLoadOptions;
-    var loadData = options.loadData;
-    var corsEnabled = options.corsEnabled;
-    var videoUrls = options.getOptimalVideoUrls(url);
-    var videoLoader = VideoLoader(videoUrls, loadData, corsEnabled);
-    var videoElement = await videoLoader.done;
+      [VideoLoadOptions? videoLoadOptions]) async {
+    final options = videoLoadOptions ?? Video.defaultLoadOptions;
+    final loadData = options.loadData;
+    final corsEnabled = options.corsEnabled;
+    final videoUrls = options.getOptimalVideoUrls(url);
+    final videoLoader = VideoLoader(videoUrls, loadData, corsEnabled);
+    final videoElement = await videoLoader.done;
     return Video._(videoElement);
   }
 
@@ -89,13 +89,13 @@ class Video {
   /// the video independantly from this video.
 
   Future<Video> clone() {
-    var videoElement = this.videoElement.clone(true) as VideoElement;
-    var completer = Completer<Video>();
-    StreamSubscription onCanPlaySubscription;
-    StreamSubscription onErrorSubscription;
+    final videoElement = this.videoElement.clone(true) as VideoElement;
+    final completer = Completer<Video>();
+    late StreamSubscription onCanPlaySubscription;
+    late StreamSubscription onErrorSubscription;
 
     void onCanPlay(html.Event e) {
-      var video = Video._(videoElement);
+      final video = Video._(videoElement);
       video.volume = volume;
       video.muted = muted;
       onCanPlaySubscription.cancel();
@@ -106,8 +106,8 @@ class Video {
     void onError(html.Event e) {
       onCanPlaySubscription.cancel();
       onErrorSubscription.cancel();
-      var error = videoElement.error;
-      var loadError = LoadError('Failed to clone video.', error);
+      final error = videoElement.error;
+      final loadError = LoadError('Failed to clone video.', error);
       completer.completeError(loadError);
     }
 

@@ -7,15 +7,15 @@ class _DisplayObjectCache {
   bool debugBorder = true;
 
   Rectangle<num> bounds = Rectangle<num>(0, 0, 256, 256);
-  RenderTexture renderTexture;
-  RenderTextureQuad renderTextureQuad;
+  RenderTexture? renderTexture;
+  RenderTextureQuad? renderTextureQuad;
 
   _DisplayObjectCache(this.displayObject);
 
   //---------------------------------------------------------------------------
 
   void dispose() {
-    if (renderTexture != null) renderTexture.dispose();
+    renderTexture?.dispose();
     renderTexture = null;
     renderTextureQuad = null;
   }
@@ -23,58 +23,57 @@ class _DisplayObjectCache {
   //---------------------------------------------------------------------------
 
   void update() {
-    var l = (pixelRatio * bounds.left).floor();
-    var t = (pixelRatio * bounds.top).floor();
-    var r = (pixelRatio * bounds.right).ceil();
-    var b = (pixelRatio * bounds.bottom).ceil();
-    var w = r - l;
-    var h = b - t;
+    final l = (pixelRatio * bounds.left).floor();
+    final t = (pixelRatio * bounds.top).floor();
+    final r = (pixelRatio * bounds.right).ceil();
+    final b = (pixelRatio * bounds.bottom).ceil();
+    final w = r - l;
+    final h = b - t;
 
     // adjust size of texture and quad
 
-    var pr = pixelRatio;
-    var sr = Rectangle<int>(0, 0, w, h);
-    var or = Rectangle<int>(0 - l, 0 - t, w, h);
+    final pr = pixelRatio;
+    final sr = Rectangle<int>(0, 0, w, h);
+    final or = Rectangle<int>(0 - l, 0 - t, w, h);
 
     if (renderTexture == null) {
       renderTexture = RenderTexture(w, h, Color.Transparent);
-      renderTextureQuad = RenderTextureQuad(renderTexture, sr, or, 0, pr);
+      renderTextureQuad = RenderTextureQuad(renderTexture!, sr, or, 0, pr);
     } else {
-      renderTexture.resize(w, h);
-      renderTextureQuad = RenderTextureQuad(renderTexture, sr, or, 0, pr);
+      renderTexture!.resize(w, h);
+      renderTextureQuad = RenderTextureQuad(renderTexture!, sr, or, 0, pr);
     }
 
     // render display object to texture
 
-    var canvas = renderTexture.canvas;
-    var matrix = renderTextureQuad.drawMatrix;
-    var renderContext = RenderContextCanvas(canvas);
-    var renderState = RenderState(renderContext, matrix);
+    final canvas = renderTexture!.canvas;
+    final matrix = renderTextureQuad!.drawMatrix;
+    final renderContext = RenderContextCanvas(canvas);
+    final renderState = RenderState(renderContext, matrix);
 
     renderContext.clear(Color.Transparent);
     displayObject.render(renderState);
 
     // apply filters
 
-    var filters = displayObject.filters;
-
-    if (filters != null && filters.isNotEmpty) {
-      var bitmapData = BitmapData.fromRenderTextureQuad(renderTextureQuad);
+    final filters = displayObject.filters;
+    if (filters.isNotEmpty) {
+      final bitmapData = BitmapData.fromRenderTextureQuad(renderTextureQuad!);
       filters.forEach((filter) => filter.apply(bitmapData));
     }
 
     // draw optional debug border
 
     if (debugBorder) {
-      var context = canvas.context2D;
+      final context = canvas.context2D;
       context.setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
       context.lineWidth = 1;
       context.lineJoin = 'miter';
       context.lineCap = 'butt';
       context.strokeStyle = '#FF00FF';
-      context.strokeRect(0.5, 0.5, canvas.width - 1, canvas.height - 1);
+      context.strokeRect(0.5, 0.5, canvas.width! - 1, canvas.height! - 1);
     }
 
-    renderTexture.update();
+    renderTexture!.update();
   }
 }

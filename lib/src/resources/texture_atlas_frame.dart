@@ -16,10 +16,10 @@ class TextureAtlasFrame {
   final int frameWidth;
   final int frameHeight;
 
-  final Float32List vxList;
-  final Int16List ixList;
+  final Float32List? vxList;
+  final Int16List? ixList;
 
-  BitmapData _bitmapData;
+  late final BitmapData _bitmapData;
 
   //---------------------------------------------------------------------------
 
@@ -38,12 +38,12 @@ class TextureAtlasFrame {
       this.frameHeight,
       this.vxList,
       this.ixList) {
-    var s = Rectangle<int>(frameX, frameY, frameWidth, frameHeight);
-    var o = Rectangle<int>(-offsetX, -offsetY, originalWidth, originalHeight);
-    var q = RenderTextureQuad.slice(textureAtlasQuad, s, o, rotation);
+    final s = Rectangle<int>(frameX, frameY, frameWidth, frameHeight);
+    final o = Rectangle<int>(-offsetX, -offsetY, originalWidth, originalHeight);
+    final q = RenderTextureQuad.slice(textureAtlasQuad, s, o, rotation);
 
     if (vxList != null && ixList != null) {
-      q.setCustomVertices(vxList, ixList);
+      q.setCustomVertices(vxList!, ixList!);
     } else {
       q.setQuadVertices();
     }

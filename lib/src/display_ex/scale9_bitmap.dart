@@ -10,12 +10,13 @@ class Scale9Bitmap extends Bitmap {
   num _width = 0.0;
   num _height = 0.0;
 
-  final List<RenderTextureQuad> _slices = List<RenderTextureQuad>(9);
+  final List<RenderTextureQuad?> _slices = List.filled(9, null);
 
-  Scale9Bitmap(BitmapData bitmapData, Rectangle<num> grid) : super(bitmapData) {
-    _grid = grid;
-    _width = ensureNum(bitmapData.width);
-    _height = ensureNum(bitmapData.height);
+  Scale9Bitmap(BitmapData bitmapData, Rectangle<num> grid)
+      : _grid = grid,
+        super(bitmapData) {
+    _width = bitmapData.width;
+    _height = bitmapData.height;
     _updateRenderTextureQuads();
   }
 
@@ -29,7 +30,7 @@ class Scale9Bitmap extends Bitmap {
 
   @override
   set width(num value) {
-    _width = ensureNum(value);
+    _width = value;
   }
 
   /// Gets and sets the height of this Scale9Bitmap. In contrast to other
@@ -40,7 +41,7 @@ class Scale9Bitmap extends Bitmap {
 
   @override
   set height(num value) {
-    _height = ensureNum(value);
+    _height = value;
   }
 
   /// Gets and sets the grid rectangle within the BitmapData to be scaled.
@@ -55,7 +56,7 @@ class Scale9Bitmap extends Bitmap {
   /// Gets and sets the BitmapData of this Scale9Bitmap.
 
   @override
-  set bitmapData(BitmapData value) {
+  set bitmapData(BitmapData? value) {
     super.bitmapData = value;
     _updateRenderTextureQuads();
   }
@@ -63,12 +64,10 @@ class Scale9Bitmap extends Bitmap {
   //---------------------------------------------------------------------------
 
   @override
-  Rectangle<num> get bounds {
-    return Rectangle<num>(0.0, 0.0, _width, _height);
-  }
+  Rectangle<num> get bounds => Rectangle<num>(0.0, 0.0, _width, _height);
 
   @override
-  DisplayObject hitTestInput(num localX, num localY) {
+  DisplayObject? hitTestInput(num localX, num localY) {
     if (localX < 0.0 || localX >= _width) return null;
     if (localY < 0.0 || localY >= _height) return null;
     return this;
@@ -79,28 +78,55 @@ class Scale9Bitmap extends Bitmap {
     // We could use renderState.renderTextureMesh, it would work great with
     // the WebGL renderer but not so good with the Canvas2D renderer.
 
-    var globalMatrix = renderState.globalMatrix;
-    var renderContext = renderState.renderContext;
-    var tempMatrix = globalMatrix.clone();
+    // If first slice set, all the rest should be too
+    if (_slices.first == null) return;
 
-    var w0 = _slices[0].targetWidth;
-    var h0 = _slices[0].targetHeight;
-    var w1 = _slices[4].targetWidth;
-    var h1 = _slices[4].targetHeight;
-    var w2 = _slices[8].targetWidth;
-    var h2 = _slices[8].targetHeight;
+    final globalMatrix = renderState.globalMatrix;
+    final renderContext = renderState.renderContext;
+    final tempMatrix = globalMatrix.clone();
+
+    final w0 = _slices[0]!.targetWidth;
+    final h0 = _slices[0]!.targetHeight;
+    final w1 = _slices[4]!.targetWidth;
+    final h1 = _slices[4]!.targetHeight;
+    final w2 = _slices[8]!.targetWidth;
+    final h2 = _slices[8]!.targetHeight;
 
     for (var j = 0; j < 3; j++) {
-      var sh = j == 0 ? h0 : j == 2 ? h2 : h1;
-      var th = j == 0 ? h0 : j == 2 ? h2 : height - h0 - h2;
-      var ty = j == 0 ? 0 : j == 1 ? h0 : height - h2;
+      final sh = j == 0
+          ? h0
+          : j == 2
+              ? h2
+              : h1;
+      final th = j == 0
+          ? h0
+          : j == 2
+              ? h2
+              : height - h0 - h2;
+      final ty = j == 0
+          ? 0
+          : j == 1
+              ? h0
+              : height - h2;
       for (var i = 0; i < 3; i++) {
-        var sw = i == 0 ? w0 : i == 2 ? w2 : w1;
-        var tw = i == 0 ? w0 : i == 2 ? w2 : width - w0 - w2;
-        var tx = i == 0 ? 0 : i == 1 ? w0 : width - w2;
+        final sw = i == 0
+            ? w0
+            : i == 2
+                ? w2
+                : w1;
+        final tw = i == 0
+            ? w0
+            : i == 2
+                ? w2
+                : width - w0 - w2;
+        final tx = i == 0
+            ? 0
+            : i == 1
+                ? w0
+                : width - w2;
         globalMatrix.setTo(tw / sw, 0, 0, th / sh, tx, ty);
         globalMatrix.concat(tempMatrix);
-        renderContext.renderTextureQuad(renderState, _slices[i + j * 3]);
+        renderContext.renderTextureQuad(renderState, _slices[i + j * 3]!);
       }
     }
 
@@ -110,27 +136,47 @@ class Scale9Bitmap extends Bitmap {
   //---------------------------------------------------------------------------
 
   void _updateRenderTextureQuads() {
-    var rtq = bitmapData.renderTextureQuad;
+    if (bitmapData == null) return;
 
-    var x0 = 0;
-    var x1 = (rtq.pixelRatio * grid.left).round();
-    var x2 = (rtq.pixelRatio * grid.right).round();
-    var x3 = (rtq.sourceRectangle.width);
+    final rtq = bitmapData!.renderTextureQuad;
 
-    var y0 = 0;
-    var y1 = (rtq.pixelRatio * grid.top).round();
-    var y2 = (rtq.pixelRatio * grid.bottom).round();
-    var y3 = (rtq.sourceRectangle.height);
+    const x0 = 0;
+    final x1 = (rtq.pixelRatio * grid.left).round();
+    final x2 = (rtq.pixelRatio * grid.right).round();
+    final x3 = rtq.sourceRectangle.width;
+
+    const y0 = 0;
+    final y1 = (rtq.pixelRatio * grid.top).round();
+    final y2 = (rtq.pixelRatio * grid.bottom).round();
+    final y3 = rtq.sourceRectangle.height;
 
     for (var j = 0; j < 3; j++) {
-      var y = (j == 0 ? y0 : j == 1 ? y1 : y2);
-      var h = (j == 0 ? y1 : j == 1 ? y2 : y3) - y;
+      final y = j == 0
+          ? y0
+          : j == 1
+              ? y1
+              : y2;
+      final h = (j == 0
+              ? y1
+              : j == 1
+                  ? y2
+                  : y3) -
+          y;
       for (var i = 0; i < 3; i++) {
-        var x = (i == 0 ? x0 : i == 1 ? x1 : x2);
-        var w = (i == 0 ? x1 : i == 1 ? x2 : x3) - x;
-        var source = Rectangle<int>(x, y, w, h);
-        var offset = Rectangle<int>(0, 0, w, h);
-        var slice = RenderTextureQuad.slice(rtq, source, offset);
+        final x = i == 0
+            ? x0
+            : i == 1
+                ? x1
+                : x2;
+        final w = (i == 0
+                ? x1
+                : i == 1
+                    ? x2
+                    : x3) -
+            x;
+        final source = Rectangle<int>(x, y, w, h);
+        final offset = Rectangle<int>(0, 0, w, h);
+        final slice = RenderTextureQuad.slice(rtq, source, offset);
         _slices[i + j * 3] = slice;
       }
     }

@@ -6,7 +6,7 @@ class _MouseButton {
   final String mouseClickEventType;
   final String mouseDoubleClickEventType;
 
-  InteractiveObject target;
+  InteractiveObject? target;
   bool buttonDown = false;
   int clickTime = 0;
   int clickCount = 0;
@@ -35,10 +35,7 @@ class _TouchPoint {
 
   InteractiveObject currentTarget;
 
-  _TouchPoint(InteractiveObject target, bool primaryTouchPoint)
-      : target = target,
-        currentTarget = target,
-        primaryTouchPoint = primaryTouchPoint;
+  _TouchPoint(this.target, this.primaryTouchPoint) : currentTarget = target;
 }
 
 //------------------------------------------------------------------------------
@@ -47,7 +44,7 @@ class _Drag {
   final Stage stage;
   final Sprite sprite;
   final Point<num> anchor;
-  final Rectangle<num> bounds;
+  final Rectangle<num>? bounds;
   final int touchPointID;
 
   _Drag(this.stage, this.sprite, this.anchor, this.bounds, this.touchPointID);
@@ -55,13 +52,14 @@ class _Drag {
   void update(int touchPointID, Point<num> stagePoint) {
     if (touchPointID != this.touchPointID) return;
 
-    var localPoint = Point<num>(0.0, 0.0);
-    var parentPoint = Point<num>(0.0, 0.0);
-    var visible = sprite.visible;
+    final localPoint = Point<num>(0.0, 0.0);
+    final parentPoint = Point<num>(0.0, 0.0);
+    final visible = sprite.visible;
 
     sprite.globalToLocal(stagePoint, localPoint);
 
     if (bounds != null) {
+      final bounds = this.bounds!;
       sprite.localToParent(localPoint, parentPoint);
       if (parentPoint.x < bounds.left) parentPoint.x = bounds.left;
       if (parentPoint.x > bounds.right) parentPoint.x = bounds.right;

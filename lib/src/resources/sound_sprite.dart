@@ -13,27 +13,27 @@ part of stagexl.resources;
 
 class SoundSprite {
   final List<SoundSpriteSegment> _segments = <SoundSpriteSegment>[];
-  Sound _sound;
+  late final Sound _sound;
 
   //----------------------------------------------------------------------------
 
   static Future<SoundSprite> load(String url,
-      [SoundLoadOptions soundLoadOptions]) async {
-    var soundSprite = SoundSprite();
+      [SoundLoadOptions? soundLoadOptions]) async {
+    final soundSprite = SoundSprite();
 
-    var soundSpriteJson = await HttpRequest.getString(url);
-    var data = json.decode(soundSpriteJson);
-    var urls = data['urls'] as List<dynamic>;
-    var segments = data['sprite'];
-    var soundUrls = <String>[];
+    final soundSpriteJson = await HttpRequest.getString(url);
+    final data = json.decode(soundSpriteJson) as Map;
+    final urls = (data['urls'] as List).cast<String>();
+    final segments = data['sprite'];
+    final soundUrls = <String>[];
 
     if (segments is Map) {
-      for (String segment in segments.keys) {
-        var segmentList = segments[segment] as List;
-        var startTime = ensureNum(segmentList[0]);
-        var duration = ensureNum(segmentList[1]);
-        var loop = ensureBool(segmentList.length > 2 && segmentList[2]);
-        var sss =
+      for (var segment in segments.keys as Iterable<String>) {
+        final segmentList = segments[segment] as List;
+        final startTime = segmentList[0] as num;
+        final duration = segmentList[1] as num;
+        final loop = segmentList.length > 2 && segmentList[2] as bool;
+        final sss =
             SoundSpriteSegment(soundSprite, segment, startTime, duration, loop);
         soundSprite._segments.add(sss);
       }
@@ -50,26 +50,23 @@ class SoundSprite {
 
   Sound get sound => _sound;
 
-  List<SoundSpriteSegment> get segments {
-    return _segments.toList(growable: false);
-  }
+  List<SoundSpriteSegment> get segments => _segments.toList(growable: false);
 
-  List<String> get segmentNames {
-    return _segments.map((s) => s.name).toList(growable: false);
-  }
+  List<String> get segmentNames =>
+      _segments.map((s) => s.name).toList(growable: false);
 
   //----------------------------------------------------------------------------
 
   SoundSpriteSegment getSegment(String name) {
-    var segment = _segments.firstWhere((s) => s.name == name);
-    if (segment == null) {
-      throw ArgumentError("SoundSpriteSegment not found: '$name'");
-    } else {
+    try {
+      final segment = _segments.firstWhere((s) => s.name == name);
       return segment;
+    } on StateError catch (_) {
+      throw ArgumentError("SoundSpriteSegment not found: '$name'");
     }
   }
 
-  SoundChannel play(String name, [bool loop, SoundTransform soundTransform]) {
-    return getSegment(name).play(loop, soundTransform);
-  }
+  SoundChannel play(String name,
+          [bool? loop, SoundTransform? soundTransform]) =>
+      getSegment(name).play(loop, soundTransform);
 }

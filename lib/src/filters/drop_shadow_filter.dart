@@ -9,15 +9,15 @@ import '../internal/filter_helpers.dart';
 import '../internal/tools.dart';
 
 class DropShadowFilter extends BitmapFilter {
-  num _distance;
-  num _angle;
-  int _blurX;
-  int _blurY;
-  int _quality;
-  int _color;
+  num _distance = 8;
+  num _angle = pi / 4;
+  int _blurX = 4;
+  int _blurY = 4;
+  int _quality = 1;
+  int _color = 0xFF000000;
 
-  bool knockout;
-  bool hideObject;
+  bool knockout = false;
+  bool hideObject = false;
 
   final List<int> _renderPassSources = <int>[];
   final List<int> _renderPassTargets = <int>[];
@@ -29,33 +29,29 @@ class DropShadowFilter extends BitmapFilter {
       int blurX = 4,
       int blurY = 4,
       int quality = 1,
-      bool knockout = false,
-      bool hideObject = false]) {
+      this.knockout = false,
+      this.hideObject = false]) {
     this.distance = distance;
     this.angle = angle;
     this.color = color;
     this.blurX = blurX;
     this.blurY = blurY;
     this.quality = quality;
-    this.knockout = knockout;
-    this.hideObject = hideObject;
   }
 
   //---------------------------------------------------------------------------
   //---------------------------------------------------------------------------
 
   @override
-  BitmapFilter clone() {
-    return DropShadowFilter(
-        distance, angle, color, blurX, blurY, quality, knockout, hideObject);
-  }
+  BitmapFilter clone() => DropShadowFilter(
+      distance, angle, color, blurX, blurY, quality, knockout, hideObject);
 
   @override
   Rectangle<int> get overlap {
-    var shiftX = (distance * cos(angle)).round();
-    var shiftY = (distance * sin(angle)).round();
-    var sRect = Rectangle<int>(-1, -1, 2, 2);
-    var dRect =
+    final shiftX = (distance * cos(angle)).round();
+    final shiftY = (distance * sin(angle)).round();
+    final sRect = Rectangle<int>(-1, -1, 2, 2);
+    final dRect =
         Rectangle<int>(shiftX - blurX, shiftY - blurY, 2 * blurX, 2 * blurY);
     return sRect.boundingBox(dRect);
   }
@@ -137,28 +133,28 @@ class DropShadowFilter extends BitmapFilter {
   //---------------------------------------------------------------------------
 
   @override
-  void apply(BitmapData bitmapData, [Rectangle<num> rectangle]) {
-    var renderTextureQuad = rectangle == null
+  void apply(BitmapData bitmapData, [Rectangle<num>? rectangle]) {
+    final renderTextureQuad = rectangle == null
         ? bitmapData.renderTextureQuad
         : bitmapData.renderTextureQuad.cut(rectangle);
 
-    var sourceImageData = hideObject == false || knockout
+    final sourceImageData = hideObject == false || knockout
         ? renderTextureQuad.getImageData()
         : null;
 
-    var imageData = renderTextureQuad.getImageData();
-    List<int> data = imageData.data;
-    var width = ensureInt(imageData.width);
-    var height = ensureInt(imageData.height);
-    var shiftX = (distance * cos(angle)).round();
-    var shiftY = (distance * sin(angle)).round();
+    final imageData = renderTextureQuad.getImageData();
+    final List<int> data = imageData.data;
+    final width = imageData.width;
+    final height = imageData.height;
+    final shiftX = (distance * cos(angle)).round();
+    final shiftY = (distance * sin(angle)).round();
 
-    var pixelRatio = renderTextureQuad.pixelRatio;
-    var blurX = (this.blurX * pixelRatio).round();
-    var blurY = (this.blurY * pixelRatio).round();
-    var alphaChannel =
+    final pixelRatio = renderTextureQuad.pixelRatio;
+    final blurX = (this.blurX * pixelRatio).round();
+    final blurY = (this.blurY * pixelRatio).round();
+    final alphaChannel =
         BitmapDataChannel.getCanvasIndex(BitmapDataChannel.ALPHA);
-    var stride = width * 4;
+    final stride = width * 4;
 
     shiftChannel(data, 3, width, height, shiftX, shiftY);
 
@@ -171,11 +167,11 @@ class DropShadowFilter extends BitmapFilter {
     }
 
     if (knockout) {
-      setColorKnockout(data, color, sourceImageData.data);
+      setColorKnockout(data, color, sourceImageData!.data);
     } else if (hideObject) {
       setColor(data, color);
     } else {
-      setColorBlend(data, color, sourceImageData.data);
+      setColorBlend(data, color, sourceImageData!.data);
     }
 
     renderTextureQuad.putImageData(imageData);
@@ -186,20 +182,20 @@ class DropShadowFilter extends BitmapFilter {
   @override
   void renderFilter(
       RenderState renderState, RenderTextureQuad renderTextureQuad, int pass) {
-    RenderContextWebGL renderContext = renderState.renderContext;
-    var renderTexture = renderTextureQuad.renderTexture;
-    var passCount = _renderPassSources.length;
-    var passScale = pow(0.5, pass >> 1);
-    var pixelRatio = sqrt(renderState.globalMatrix.det.abs());
-    var pixelRatioScale = pixelRatio * passScale;
-    var pixelRatioDistance = pixelRatio * distance;
+    final renderContext = renderState.renderContext as RenderContextWebGL;
+    final renderTexture = renderTextureQuad.renderTexture;
+    final passCount = _renderPassSources.length;
+    final passScale = pow(0.5, pass >> 1);
+    final pixelRatio = sqrt(renderState.globalMatrix.det.abs());
+    final pixelRatioScale = pixelRatio * passScale;
+    final pixelRatioDistance = pixelRatio * distance;
 
     if (pass == passCount - 1) {
       if (!knockout && !hideObject) {
         renderContext.renderTextureQuad(renderState, renderTextureQuad);
       }
     } else {
-      var renderProgram = renderContext.getRenderProgram(
+      final renderProgram = renderContext.getRenderProgram(
           r'$DropShadowFilterProgram', () => DropShadowFilterProgram());
 
       renderContext.activateRenderProgram(renderProgram);
@@ -281,10 +277,10 @@ class DropShadowFilterProgram extends RenderProgramSimple {
 
   void configure(
       int color, num alpha, num shiftX, num shiftY, num radiusX, num radiusY) {
-    num r = colorGetR(color) / 255.0;
-    num g = colorGetG(color) / 255.0;
-    num b = colorGetB(color) / 255.0;
-    num a = colorGetA(color) / 255.0 * alpha;
+    final num r = colorGetR(color) / 255.0;
+    final num g = colorGetG(color) / 255.0;
+    final num b = colorGetB(color) / 255.0;
+    final num a = colorGetA(color) / 255.0 * alpha;
 
     renderingContext.uniform2f(uniforms['uShift'], shiftX, shiftY);
     renderingContext.uniform2f(uniforms['uRadius'], radiusX, radiusY);

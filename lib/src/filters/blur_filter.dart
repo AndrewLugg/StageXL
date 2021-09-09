@@ -6,12 +6,11 @@ import '../display.dart';
 import '../engine.dart';
 import '../geom.dart';
 import '../internal/filter_helpers.dart';
-import '../internal/tools.dart';
 
 class BlurFilter extends BitmapFilter {
-  int _blurX;
-  int _blurY;
-  int _quality;
+  late int _blurX;
+  late int _blurY;
+  late int _quality;
 
   final List<int> _renderPassSources = <int>[];
   final List<int> _renderPassTargets = <int>[];
@@ -30,14 +29,11 @@ class BlurFilter extends BitmapFilter {
   }
 
   @override
-  BitmapFilter clone() {
-    return BlurFilter(blurX, blurY);
-  }
+  BitmapFilter clone() => BlurFilter(blurX, blurY);
 
   @override
-  Rectangle<int> get overlap {
-    return Rectangle<int>(-blurX, -blurY, 2 * blurX, 2 * blurY);
-  }
+  Rectangle<int> get overlap =>
+      Rectangle<int>(-blurX, -blurY, 2 * blurX, 2 * blurY);
 
   @override
   List<int> get renderPassSources => _renderPassSources;
@@ -89,20 +85,20 @@ class BlurFilter extends BitmapFilter {
   //---------------------------------------------------------------------------
 
   @override
-  void apply(BitmapData bitmapData, [Rectangle<num> rectangle]) {
-    var renderTextureQuad = rectangle == null
+  void apply(BitmapData bitmapData, [Rectangle<num>? rectangle]) {
+    final renderTextureQuad = rectangle == null
         ? bitmapData.renderTextureQuad
         : bitmapData.renderTextureQuad.cut(rectangle);
 
-    var imageData = renderTextureQuad.getImageData();
-    var data = imageData.data;
-    var width = ensureInt(imageData.width);
-    var height = ensureInt(imageData.height);
+    final imageData = renderTextureQuad.getImageData();
+    final data = imageData.data;
+    final width = imageData.width;
+    final height = imageData.height;
 
-    var pixelRatio = renderTextureQuad.pixelRatio;
-    var blurX = (this.blurX * pixelRatio).round();
-    var blurY = (this.blurY * pixelRatio).round();
-    var stride = width * 4;
+    final pixelRatio = renderTextureQuad.pixelRatio;
+    final blurX = (this.blurX * pixelRatio).round();
+    final blurY = (this.blurY * pixelRatio).round();
+    final stride = width * 4;
 
     premultiplyAlpha(data);
 
@@ -130,14 +126,14 @@ class BlurFilter extends BitmapFilter {
   @override
   void renderFilter(
       RenderState renderState, RenderTextureQuad renderTextureQuad, int pass) {
-    var renderContext = renderState.renderContext as RenderContextWebGL;
-    var renderTexture = renderTextureQuad.renderTexture;
-    var passCount = _renderPassSources.length;
-    var passScale = pow(0.5, pass >> 1);
-    var pixelRatio = sqrt(renderState.globalMatrix.det.abs());
-    var pixelRatioScale = pixelRatio * passScale;
+    final renderContext = renderState.renderContext as RenderContextWebGL;
+    final renderTexture = renderTextureQuad.renderTexture;
+    final passCount = _renderPassSources.length;
+    final passScale = pow(0.5, pass >> 1);
+    final pixelRatio = sqrt(renderState.globalMatrix.det.abs());
+    final pixelRatioScale = pixelRatio * passScale;
 
-    var renderProgram = renderContext.getRenderProgram(
+    final renderProgram = renderContext.getRenderProgram(
         r'$BlurFilterProgram', () => BlurFilterProgram());
 
     renderContext.activateRenderProgram(renderProgram);

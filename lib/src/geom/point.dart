@@ -41,14 +41,13 @@ class Point<T extends num> implements math.Point<T> {
   /// with [x] equal to `other.x` and [y] equal to `other.y`.
 
   @override
-  bool operator ==(Object other) {
-    return other is math.Point && x == other.x && y == other.y;
-  }
+  bool operator ==(Object other) =>
+      other is math.Point && x == other.x && y == other.y;
 
   @override
   int get hashCode {
-    var a = x.hashCode;
-    var b = y.hashCode;
+    final a = x.hashCode;
+    final b = y.hashCode;
     return JenkinsHash.hash2(a, b);
   }
 
@@ -57,18 +56,16 @@ class Point<T extends num> implements math.Point<T> {
   /// Returns the resulting "vector" as a Point.
 
   @override
-  Point<T> operator +(math.Point<T> other) {
-    return Point<T>(x + other.x, y + other.y);
-  }
+  Point<T> operator +(math.Point<T> other) =>
+      Point<T>(x + other.x as T, y + other.y as T);
 
   /// Subtract [other] from `this`, as if both points were vectors.
   ///
   /// Returns the resulting "vector" as a Point.
 
   @override
-  Point<T> operator -(math.Point<T> other) {
-    return Point<T>(x - other.x, y - other.y);
-  }
+  Point<T> operator -(math.Point<T> other) =>
+      Point<T>(x - other.x as T, y - other.y as T);
 
   /// Scale this point by [factor] as if it were a vector.
   ///
@@ -79,9 +76,8 @@ class Point<T extends num> implements math.Point<T> {
   /// _runtime_ _error_ in checked mode.
 
   @override
-  Point<T> operator *(num /*T|int*/ factor) {
-    return Point<T>(x * factor as T, y * factor as T);
-  }
+  Point<T> operator *(num /*T|int*/ factor) =>
+      Point<T>(x * factor as T, y * factor as T);
 
   //-------------------------------------------------------------------------------------------------
 
@@ -110,16 +106,16 @@ class Point<T extends num> implements math.Point<T> {
   /// Offsets this Point by the specified amount.
 
   void offset(T dx, T dy) {
-    x += dx;
-    y += dy;
+    x = x + dx as T;
+    y = y + dy as T;
   }
 
   /// Returns the distance between `this` and [other].
 
   @override
   double distanceTo(math.Point<T> other) {
-    var dx = x - other.x;
-    var dy = y - other.y;
+    final dx = x - other.x;
+    final dy = y - other.y;
     return sqrt(dx * dx + dy * dy);
   }
 
@@ -130,8 +126,8 @@ class Point<T extends num> implements math.Point<T> {
 
   @override
   T squaredDistanceTo(math.Point<T> other) {
-    var dx = x - other.x;
-    var dy = y - other.y;
-    return dx * dx + dy * dy;
+    final dx = x - other.x;
+    final dy = y - other.y;
+    return dx * dx + dy * dy as T;
   }
 }

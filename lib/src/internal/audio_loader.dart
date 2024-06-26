@@ -1,5 +1,3 @@
-library stagexl.internal.audio_loader;
-
 import 'dart:async';
 import 'dart:html';
 
@@ -12,8 +10,8 @@ class AudioLoader {
   final AggregateError aggregateError = AggregateError('Error loading sound.');
   final Completer<AudioElement> _completer = Completer<AudioElement>();
 
-  late StreamSubscription _onCanPlaySubscription;
-  late StreamSubscription _onErrorSubscription;
+  late StreamSubscription<Event> _onCanPlaySubscription;
+  late StreamSubscription<Event> _onErrorSubscription;
   final List<String> _urls = <String>[];
   bool _loadData = false;
 
@@ -75,7 +73,7 @@ class AudioLoader {
       reader.readAsDataUrl(request.response as Blob);
       reader.onLoadEnd.first
           .then((e) => _loadAudioSource(reader.result as String));
-    }).catchError((error) {
+    }).catchError((Object error) {
       final loadError = LoadError('Failed to load $url.', error);
       aggregateError.errors.add(loadError);
       _loadNextUrl();

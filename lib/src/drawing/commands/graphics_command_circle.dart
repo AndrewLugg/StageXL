@@ -1,4 +1,4 @@
-part of stagexl.drawing;
+part of '../../drawing.dart';
 
 class GraphicsCommandCircle extends GraphicsCommand {
   double _x;
@@ -47,7 +47,7 @@ class GraphicsCommandCircle extends GraphicsCommand {
   @override
   void updateContext(GraphicsContext context) {
     context.moveTo(x + radius, y);
-    context.arc(x, y, radius, 0.0, 2 * pi, antiClockwise);
+    context.arc(x, y, radius, 0, 2 * pi, antiClockwise);
     context.closePath();
   }
 }

@@ -1,10 +1,10 @@
-part of stagexl.media;
+part of '../../media.dart';
 
 class AudioElementSoundChannel extends SoundChannel {
   final AudioElementSound _audioElementSound;
   late SoundTransform _soundTransform;
   AudioElement? _audioElement;
-  StreamSubscription? _volumeChangedSubscription;
+  StreamSubscription<num>? _volumeChangedSubscription;
   Timer? _completeTimer;
 
   bool _stopped = false;

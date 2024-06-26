@@ -1,4 +1,4 @@
-part of stagexl.resources;
+part of '../resources.dart';
 
 class ResourceManager {
   final Map<String, ResourceManagerResource> _resourceMap =
@@ -112,7 +112,12 @@ class ResourceManager {
   bool containsSound(String name) => _containsResource('Sound', name);
 
   void addSound(String name, String url, [SoundLoadOptions? options]) {
-    final loader = Sound.load(url, options);
+    Future loader;
+    if (url.startsWith('data:')) {
+      loader = Sound.loadDataUrl(url, options);
+    } else {
+      loader = Sound.load(url, options);
+    }
     _addResource('Sound', name, url, loader);
   }
 
@@ -226,6 +231,7 @@ class ResourceManager {
     } else if (resource.value != null) {
       return resource.value;
     } else if (resource.error != null) {
+      // ignore: only_throw_errors
       throw resource.error!;
     } else {
       throw StateError("Resource '$name' has not finished loading yet.");

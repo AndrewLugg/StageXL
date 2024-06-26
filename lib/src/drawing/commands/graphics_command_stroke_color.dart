@@ -1,12 +1,11 @@
-part of stagexl.drawing;
+part of '../../drawing.dart';
 
 class GraphicsCommandStrokeColor extends GraphicsCommandStroke {
   int _color;
 
   GraphicsCommandStrokeColor(
-      int color, num width, JointStyle jointStyle, CapsStyle capsStyle)
-      : _color = color,
-        super(width, jointStyle, capsStyle);
+      int color, super.width, super.jointStyle, super.capsStyle)
+      : _color = color;
 
   //---------------------------------------------------------------------------
 

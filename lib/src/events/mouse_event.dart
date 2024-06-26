@@ -1,4 +1,4 @@
-part of stagexl.events;
+part of '../events.dart';
 
 /// An event that is dispatched into the event flow whenever mouse events occur.
 ///
@@ -34,6 +34,10 @@ class MouseEvent extends InputEvent {
   static const String ROLL_OUT = 'rollOut';
   static const String ROLL_OVER = 'rollOver';
 
+  static const String DRAG_ENTER = 'dragEnter';
+  static const String DRAG_LEAVE = 'dragLeave';
+  static const String DROP = 'drop';
+
   //---------------------------------------------------------------------------
 
   /// The amount that is expected to scroll horizontally.
@@ -68,22 +72,23 @@ class MouseEvent extends InputEvent {
 
   final int clickCount;
 
+  final DataTransfer? dataTransfer;
+
   /// Creates a new [MouseEvent].
 
   MouseEvent(
-      String type,
-      bool bubbles,
-      num localX,
-      num localY,
-      num stageX,
-      num stageY,
-      bool altKey,
-      bool ctrlKey,
-      bool shiftKey,
+      super.type,
+      super.bubbles,
+      super.localX,
+      super.localY,
+      super.stageX,
+      super.stageY,
+      bool super.altKey,
+      bool super.ctrlKey,
+      bool super.shiftKey,
       this.deltaX,
       this.deltaY,
       this.buttonDown,
-      this.clickCount)
-      : super(type, bubbles, localX, localY, stageX, stageY, altKey, ctrlKey,
-            shiftKey);
+      this.clickCount,
+      this.dataTransfer);
 }

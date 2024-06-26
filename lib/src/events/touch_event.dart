@@ -1,4 +1,4 @@
-part of stagexl.events;
+part of '../events.dart';
 
 /// The [TouchEvent] class lets you handle events on devices that detect user
 /// contact with the device (such as a finger on a touch screen).
@@ -34,17 +34,15 @@ class TouchEvent extends InputEvent {
   /// Creates a new [TouchEvent].
 
   TouchEvent(
-      String type,
-      bool bubbles,
-      num localX,
-      num localY,
-      num stageX,
-      num stageY,
-      bool? altKey,
-      bool? ctrlKey,
-      bool? shiftKey,
+      super.type,
+      super.bubbles,
+      super.localX,
+      super.localY,
+      super.stageX,
+      super.stageY,
+      super.altKey,
+      super.ctrlKey,
+      super.shiftKey,
       this.touchPointID,
-      this.isPrimaryTouchPoint)
-      : super(type, bubbles, localX, localY, stageX, stageY, altKey, ctrlKey,
-            shiftKey);
+      this.isPrimaryTouchPoint);
 }

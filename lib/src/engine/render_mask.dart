@@ -1,4 +1,4 @@
-part of stagexl.engine;
+part of '../engine.dart';
 
 /// The abstract [RenderMask] class defines the interface for masks
 /// that can be rendered by the engine.
@@ -31,10 +31,10 @@ class _MaskState {
 
 class _StencilMaskState extends _MaskState {
   final int value;
-  _StencilMaskState(RenderMask mask, this.value) : super(mask);
+  _StencilMaskState(super.mask, this.value);
 }
 
 class _ScissorMaskState extends _MaskState {
   final Rectangle<num> value;
-  _ScissorMaskState(RenderMask mask, this.value) : super(mask);
+  _ScissorMaskState(super.mask, this.value);
 }

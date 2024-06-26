@@ -1,4 +1,4 @@
-part of stagexl.display;
+part of '../display.dart';
 
 /// The StageRenderMode defines how often the Stage is rendered by
 /// the [RenderLoop] where the Stage is attached to.
@@ -65,10 +65,10 @@ class Stage extends DisplayObjectContainer {
   num _pixelRatio = 1.0;
   bool _invalid = false;
 
-  double _avgFrameTime = 0.0;
-  double _avgDrawCalls = 0.0;
-  double _avgVertexCount = 0.0;
-  double _avgIdexCount = 0.0;
+  double _avgFrameTime = 0;
+  double _avgDrawCalls = 0;
+  double _avgVertexCount = 0;
+  double _avgIdexCount = 0;
 
   final Rectangle<num> _contentRectangle = Rectangle<num>(0.0, 0.0, 0.0, 0.0);
   final Matrix _clientTransformation = Matrix.fromIdentity();
@@ -78,7 +78,11 @@ class Stage extends DisplayObjectContainer {
 
   late RenderState _renderState;
   InputEventMode _inputEventMode = InputEventMode.MouseOnly;
-  StageRenderMode _stageRenderMode = StageRenderMode.AUTO;
+
+  /// Gets and sets the render mode of this Stage. You can choose between
+  /// three different modes defined in [StageRenderMode].
+  StageRenderMode renderMode = StageRenderMode.AUTO;
+
   StageScaleMode _stageScaleMode = StageScaleMode.SHOW_ALL;
   StageAlign _stageAlign = StageAlign.NONE;
 
@@ -153,7 +157,7 @@ class Stage extends DisplayObjectContainer {
     _canvas = canvas;
     _stageAlign = options.stageAlign;
     _stageScaleMode = options.stageScaleMode;
-    _stageRenderMode = options.stageRenderMode;
+    renderMode = options.stageRenderMode;
     _inputEventMode = options.inputEventMode;
 
     _sourceWidth = width;
@@ -179,6 +183,10 @@ class Stage extends DisplayObjectContainer {
       canvas.onMouseOut.listen(_onMouseEvent);
       canvas.onContextMenu.listen(_onMouseEvent);
       canvas.onMouseWheel.listen(_onMouseWheelEvent);
+      canvas.onDragEnter.listen(_onMouseEvent);
+      canvas.onDragLeave.listen(_onMouseEvent);
+      canvas.onDragOver.listen(_onMouseEvent);
+      canvas.onDrop.listen(_onMouseEvent);
     }
 
     final listenToTouchEvents = _inputEventMode == InputEventMode.TouchOnly ||
@@ -275,15 +283,6 @@ class Stage extends DisplayObjectContainer {
   set pixelRatio(num value) {
     _pixelRatio = value;
     _updateCanvasSize();
-  }
-
-  /// Gets and sets the render mode of this Stage. You can choose between
-  /// three different modes defined in [StageRenderMode].
-
-  StageRenderMode get renderMode => _stageRenderMode;
-
-  set renderMode(StageRenderMode value) {
-    _stageRenderMode = value;
   }
 
   /// Gets and sets the scale mode of this Stage. You can choose between
@@ -398,9 +397,9 @@ class Stage extends DisplayObjectContainer {
   /// on your own and therefore get full control of the rendering of this Stage.
 
   void materialize(num currentTime, num deltaTime) {
-    if (_stageRenderMode == StageRenderMode.AUTO ||
-        _stageRenderMode == StageRenderMode.AUTO_INVALID && _invalid ||
-        _stageRenderMode == StageRenderMode.ONCE) {
+    if (renderMode == StageRenderMode.AUTO ||
+        renderMode == StageRenderMode.AUTO_INVALID && _invalid ||
+        renderMode == StageRenderMode.ONCE) {
       final stopwatch = Stopwatch()..start();
 
       _updateCanvasSize();
@@ -437,8 +436,8 @@ class Stage extends DisplayObjectContainer {
       }
     }
 
-    if (_stageRenderMode == StageRenderMode.ONCE) {
-      _stageRenderMode = StageRenderMode.STOP;
+    if (renderMode == StageRenderMode.ONCE) {
+      renderMode = StageRenderMode.STOP;
     }
   }
 
@@ -640,6 +639,11 @@ class Stage extends DisplayObjectContainer {
       dispatchEvent(Event(Event.MOUSE_LEAVE));
     }
 
+    var isDnD = event.type == 'dragenter' ||
+        event.type == 'dragleave' ||
+        event.type == 'dragover' ||
+        event.type == 'drop';
+
     //-----------------------------------------------------------------
     // MOUSE_OUT, ROLL_OUT, ROLL_OVER, MOUSE_OVER
 
@@ -681,7 +685,25 @@ class Stage extends DisplayObjectContainer {
             0.0,
             0.0,
             mouseButton.buttonDown,
-            0));
+            0,
+            null));
+        if (isDnD) {
+          oldTarget.dispatchEvent(MouseEvent(
+              MouseEvent.DRAG_LEAVE,
+              true,
+              localPoint.x,
+              localPoint.y,
+              stagePoint.x,
+              stagePoint.y,
+              event.altKey,
+              event.ctrlKey,
+              event.shiftKey,
+              0.0,
+              0.0,
+              mouseButton.buttonDown,
+              0,
+              event.dataTransfer));
+        }
       }
 
       for (var i = 0; i < oldTargetList.length - commonCount; i++) {
@@ -700,7 +722,8 @@ class Stage extends DisplayObjectContainer {
             0.0,
             0.0,
             mouseButton.buttonDown,
-            0));
+            0,
+            null));
       }
 
       for (var i = newTargetList.length - commonCount - 1; i >= 0; i--) {
@@ -719,7 +742,8 @@ class Stage extends DisplayObjectContainer {
             0.0,
             0.0,
             mouseButton.buttonDown,
-            0));
+            0,
+            null));
       }
 
       if (newTarget != null) {
@@ -737,7 +761,25 @@ class Stage extends DisplayObjectContainer {
             0.0,
             0.0,
             mouseButton.buttonDown,
-            0));
+            0,
+            null));
+        if (isDnD) {
+          newTarget.dispatchEvent(MouseEvent(
+              MouseEvent.DRAG_ENTER,
+              true,
+              localPoint.x,
+              localPoint.y,
+              stagePoint.x,
+              stagePoint.y,
+              event.altKey,
+              event.ctrlKey,
+              event.shiftKey,
+              0.0,
+              0.0,
+              mouseButton.buttonDown,
+              0,
+              event.dataTransfer));
+        }
       }
 
       _mouseTarget = newTarget;
@@ -764,23 +806,23 @@ class Stage extends DisplayObjectContainer {
       mouseButton.target = target;
       mouseButton.clickTime = time;
       mouseButton.clickCount++;
-    }
-
-    if (event.type == 'mouseup') {
+    } else if (event.type == 'mouseup') {
       mouseEventType = mouseButton.mouseUpEventType;
       mouseButton.buttonDown = false;
       isClick = mouseButton.target == target;
       isDoubleClick = isClick &&
           mouseButton.clickCount.isEven &&
           (time < mouseButton.clickTime + 500);
-    }
-
-    if (event.type == 'mousemove') {
+    } else if (event.type == 'mousemove') {
       mouseEventType = MouseEvent.MOUSE_MOVE;
-    }
-
-    if (event.type == 'contextmenu') {
+    } else if (event.type == 'contextmenu') {
       mouseEventType = MouseEvent.CONTEXT_MENU;
+    } else if (event.type == 'dragenter') {
+      mouseEventType = MouseEvent.DRAG_ENTER;
+    } else if (event.type == 'dragleave') {
+      mouseEventType = MouseEvent.DRAG_LEAVE;
+    } else if (event.type == 'drop') {
+      mouseEventType = MouseEvent.DROP;
     }
 
     //-----------------------------------------------------------------
@@ -800,7 +842,8 @@ class Stage extends DisplayObjectContainer {
           0.0,
           0.0,
           mouseButton.buttonDown,
-          mouseButton.clickCount));
+          mouseButton.clickCount,
+          isDnD ? event.dataTransfer : null));
 
       if (isClick) {
         mouseEventType = isDoubleClick && target.doubleClickEnabled
@@ -820,7 +863,8 @@ class Stage extends DisplayObjectContainer {
             0.0,
             0.0,
             mouseButton.buttonDown,
-            0));
+            0,
+            null));
       }
     }
   }
@@ -850,7 +894,8 @@ class Stage extends DisplayObjectContainer {
         event.deltaX,
         event.deltaY,
         false,
-        0);
+        0,
+        null);
 
     target.dispatchEvent(mouseEvent);
 

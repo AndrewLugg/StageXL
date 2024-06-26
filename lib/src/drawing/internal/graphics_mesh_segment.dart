@@ -1,4 +1,4 @@
-part of stagexl.drawing;
+part of '../../drawing.dart';
 
 abstract class _GraphicsMeshSegment {
   Float32List _vertexBuffer;
@@ -125,12 +125,12 @@ abstract class _GraphicsMeshSegment {
       case GraphicsGradientType.Linear:
         renderProgram = renderContext.getRenderProgram(
             r'$LinearGraphicsGradientProgram',
-            () => _LinearGraphicsGradientProgram());
+            _LinearGraphicsGradientProgram.new);
         break;
       case GraphicsGradientType.Radial:
         renderProgram = renderContext.getRenderProgram(
             r'$RadialGraphicsGradientProgram',
-            () => _RadialGraphicsGradientProgram());
+            _RadialGraphicsGradientProgram.new);
     }
 
     if (renderProgram.activeGradient != gradient) {

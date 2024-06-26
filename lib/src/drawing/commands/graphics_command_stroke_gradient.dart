@@ -1,12 +1,11 @@
-part of stagexl.drawing;
+part of '../../drawing.dart';
 
 class GraphicsCommandStrokeGradient extends GraphicsCommandStroke {
   GraphicsGradient _gradient;
 
-  GraphicsCommandStrokeGradient(GraphicsGradient gradient, num width,
-      JointStyle jointStyle, CapsStyle capsStyle)
-      : _gradient = gradient,
-        super(width, jointStyle, capsStyle);
+  GraphicsCommandStrokeGradient(
+      GraphicsGradient gradient, super.width, super.jointStyle, super.capsStyle)
+      : _gradient = gradient;
 
   //---------------------------------------------------------------------------
 

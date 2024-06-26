@@ -1,4 +1,4 @@
-part of stagexl.events;
+part of '../events.dart';
 
 /// Provides a stream of [Event]s.
 class EventStream<T extends Event> extends Stream<T> {
@@ -186,7 +186,6 @@ class EventStream<T extends Event> extends Stream<T> {
       T event, EventDispatcher target, EventPhase eventPhase) {
     final subscriptions = _subscriptions;
     final isCapturing = eventPhase == EventPhase.CAPTURING_PHASE;
-    final InputEvent? inputEvent = event is InputEvent ? event : null;
 
     for (var i = 0; i < subscriptions.length; i++) {
       final subscription = subscriptions[i];
@@ -200,7 +199,7 @@ class EventStream<T extends Event> extends Stream<T> {
       event._currentTarget = this.target;
       event._eventPhase = eventPhase;
 
-      InputEvent.current = inputEvent;
+      InputEvent.current = event is InputEvent ? event : null;
 
       if (subscription.eventListener != null) {
         subscription.eventListener!(event);

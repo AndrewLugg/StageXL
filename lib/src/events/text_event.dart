@@ -1,4 +1,4 @@
-part of stagexl.events;
+part of '../events.dart';
 
 /// An object dispatches a [TextEvent] object when a user enters text in a text
 /// field or clicks a hyperlink in an HTML-enabled text field.
@@ -19,7 +19,7 @@ class TextEvent extends Event {
   final String text;
 
   /// Creates a new [TextEvent].
-  TextEvent(String type, bool bubbles, this.text) : super(type, bubbles);
+  TextEvent(super.type, super.bubbles, this.text);
 
   //---------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-part of stagexl.events;
+part of '../events.dart';
 
 /// An [Event] that is dispatched in response to user input through a keyboard.
 ///
@@ -46,9 +46,8 @@ class KeyboardEvent extends Event {
 
   /// Creates a new [KeyboardEvent].
 
-  KeyboardEvent(String type, bool bubbles, this.keyCode, this.keyLocation,
-      this.altKey, this.ctrlKey, this.shiftKey)
-      : super(type, bubbles);
+  KeyboardEvent(super.type, super.bubbles, this.keyCode, this.keyLocation,
+      this.altKey, this.ctrlKey, this.shiftKey);
 
   //---------------------------------------------------------------------------
 

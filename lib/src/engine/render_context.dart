@@ -1,4 +1,6 @@
-part of stagexl.engine;
+// ignore_for_file: close_sinks
+
+part of '../engine.dart';
 
 /// The implementation kind of the render context.
 

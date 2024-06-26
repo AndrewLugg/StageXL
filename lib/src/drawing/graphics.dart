@@ -1,4 +1,4 @@
-part of stagexl.drawing;
+part of '../drawing.dart';
 
 /// A vector graphics drawing surface.
 ///
@@ -222,7 +222,7 @@ class Graphics {
   /// Decode the path that is encoded in the EaselJS format.
   /// Please use the [decodePath] method.
 
-  @deprecated
+  @Deprecated('Use decodePath instead')
   GraphicsCommandDecode decode(String text) {
     final command = GraphicsCommandDecodeEaselJS(text);
     addCommand(command);

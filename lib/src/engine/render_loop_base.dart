@@ -1,4 +1,4 @@
-part of stagexl.engine;
+part of '../engine.dart';
 
 final _globalFrameListeners = <void Function(double)>[];
 num _globalFrameTime = double.maxFinite;
@@ -6,7 +6,7 @@ int _globalFrameCallbackId = -1;
 
 void _globalFrameRequest() {
   if (_globalFrameCallbackId == -1) {
-    _globalFrameCallbackId = window.requestAnimationFrame((num frameTime) {
+    _globalFrameCallbackId = window.requestAnimationFrame((frameTime) {
       final currentFrameTime = frameTime / 1000.0;
       final deltaTime = currentFrameTime - _globalFrameTime;
       _globalFrameTime = currentFrameTime;
@@ -41,9 +41,7 @@ abstract class RenderLoopBase {
 
   void _onGlobalFrame(num deltaTime) {
     if (_running && deltaTime >= 0) {
-      if (deltaTime is num) {
-        advanceTime(deltaTime);
-      }
+      advanceTime(deltaTime);
     }
   }
 }

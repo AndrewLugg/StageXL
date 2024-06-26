@@ -1,7 +1,6 @@
-library stagexl.internal.environment;
-
 import 'dart:async';
 import 'dart:html';
+import 'dart:js' as js;
 import 'dart:typed_data';
 
 final bool autoHiDPI = _checkAutoHiDPI();
@@ -10,14 +9,11 @@ final Future<bool> isWebpSupported = _checkWebpSupport();
 final bool isMobileDevice = _checkMobileDevice();
 final bool isLittleEndianSystem = _checkLittleEndianSystem();
 final bool isTouchEventSupported = _checkTouchEventSupport();
+bool get isImageBitmapSupported => js.context['createImageBitmap'] != null;
 
 //-------------------------------------------------------------------------------------
 
-num _checkDevicePixelRatio() {
-  var devicePixelRatio = window.devicePixelRatio;
-  if (devicePixelRatio is! num) devicePixelRatio = 1.0;
-  return devicePixelRatio;
-}
+num _checkDevicePixelRatio() => window.devicePixelRatio;
 
 //-------------------------------------------------------------------------------------
 

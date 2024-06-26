@@ -1,4 +1,4 @@
-part of stagexl.resources;
+part of '../resources.dart';
 
 class ResourceManagerResource {
   final String kind;
@@ -6,12 +6,13 @@ class ResourceManagerResource {
   final String url;
   dynamic _value;
   dynamic _error;
-  final Completer _completer = Completer();
+  final Completer<ResourceManagerResource> _completer =
+      Completer<ResourceManagerResource>();
 
   ResourceManagerResource(this.kind, this.name, this.url, Future loader) {
     loader.then((resource) {
       _value = resource;
-    }).catchError((error) {
+    }).catchError((Object error) {
       _error = error;
     }).whenComplete(() {
       _completer.complete(this);
@@ -27,5 +28,5 @@ class ResourceManagerResource {
   dynamic get value => _value;
   Object? get error => _error;
 
-  Future get complete => _completer.future;
+  Future<ResourceManagerResource> get complete => _completer.future;
 }

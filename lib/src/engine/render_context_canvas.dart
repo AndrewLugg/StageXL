@@ -1,4 +1,4 @@
-part of stagexl.engine;
+part of '../engine.dart';
 
 class RenderContextCanvas extends RenderContext {
   final CanvasElement _canvasElement;
@@ -6,7 +6,7 @@ class RenderContextCanvas extends RenderContext {
 
   final Matrix _identityMatrix = Matrix.fromIdentity();
   BlendMode _activeBlendMode = BlendMode.NORMAL;
-  double _activeAlpha = 1.0;
+  double _activeAlpha = 1;
 
   RenderContextCanvas(CanvasElement canvasElement)
       : _canvasElement = canvasElement,
@@ -29,14 +29,14 @@ class RenderContextCanvas extends RenderContext {
   void reset() {
     setTransform(_identityMatrix);
     setBlendMode(BlendMode.NORMAL);
-    setAlpha(1.0);
+    setAlpha(1);
   }
 
   @override
   void clear(int color) {
     setTransform(_identityMatrix);
     setBlendMode(BlendMode.NORMAL);
-    setAlpha(1.0);
+    setAlpha(1);
 
     final alpha = colorGetA(color);
 
@@ -99,7 +99,9 @@ class RenderContextCanvas extends RenderContext {
     }
 
     final context = _renderingContext;
-    final source = renderTextureQuad.renderTexture.source;
+    final source = renderTextureQuad.renderTexture.source ??
+        renderTextureQuad.renderTexture.imageBitmap;
+
     final rotation = renderTextureQuad.rotation;
     final sourceRect = renderTextureQuad.sourceRectangle;
     final vxList = renderTextureQuad.vxListQuad;
@@ -117,58 +119,65 @@ class RenderContextCanvas extends RenderContext {
       context.globalCompositeOperation = blendMode.compositeOperation;
     }
 
+    // Note: We need to use js_util.callMethod for the drawImage calls,
+    // since Dart SDK does not support ImageBitmap as a CanvasImageSource
+
     if (rotation == 0) {
       context.setTransform(
           matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
-      context.drawImageScaledFromSource(
-          source!,
-          sourceRect.left,
-          sourceRect.top,
-          sourceRect.width,
-          sourceRect.height,
-          vxList[0],
-          vxList[1],
-          vxList[8] - vxList[0],
-          vxList[9] - vxList[1]);
+      js_util.callMethod<void>(context, 'drawImage', [
+        source,
+        sourceRect.left,
+        sourceRect.top,
+        sourceRect.width,
+        sourceRect.height,
+        vxList[0],
+        vxList[1],
+        vxList[8] - vxList[0],
+        vxList[9] - vxList[1]
+      ]);
     } else if (rotation == 1) {
       context.setTransform(
           -matrix.c, -matrix.d, matrix.a, matrix.b, matrix.tx, matrix.ty);
-      context.drawImageScaledFromSource(
-          source!,
-          sourceRect.left,
-          sourceRect.top,
-          sourceRect.width,
-          sourceRect.height,
-          0.0 - vxList[13],
-          vxList[12],
-          vxList[9] - vxList[1],
-          vxList[8] - vxList[0]);
+      js_util.callMethod<void>(context, 'drawImage', [
+        source,
+        sourceRect.left,
+        sourceRect.top,
+        sourceRect.width,
+        sourceRect.height,
+        0.0 - vxList[13],
+        vxList[12],
+        vxList[9] - vxList[1],
+        vxList[8] - vxList[0]
+      ]);
     } else if (rotation == 2) {
       context.setTransform(
           -matrix.a, -matrix.b, -matrix.c, -matrix.d, matrix.tx, matrix.ty);
-      context.drawImageScaledFromSource(
-          source!,
-          sourceRect.left,
-          sourceRect.top,
-          sourceRect.width,
-          sourceRect.height,
-          0.0 - vxList[8],
-          0.0 - vxList[9],
-          vxList[8] - vxList[0],
-          vxList[9] - vxList[1]);
+      js_util.callMethod<void>(context, 'drawImage', [
+        source,
+        sourceRect.left,
+        sourceRect.top,
+        sourceRect.width,
+        sourceRect.height,
+        0.0 - vxList[8],
+        0.0 - vxList[9],
+        vxList[8] - vxList[0],
+        vxList[9] - vxList[1]
+      ]);
     } else if (rotation == 3) {
       context.setTransform(
           matrix.c, matrix.d, -matrix.a, -matrix.b, matrix.tx, matrix.ty);
-      context.drawImageScaledFromSource(
-          source!,
-          sourceRect.left,
-          sourceRect.top,
-          sourceRect.width,
-          sourceRect.height,
-          vxList[5],
-          0.0 - vxList[4],
-          vxList[9] - vxList[1],
-          vxList[8] - vxList[0]);
+      js_util.callMethod<void>(context, 'drawImage', [
+        source,
+        sourceRect.left,
+        sourceRect.top,
+        sourceRect.width,
+        sourceRect.height,
+        vxList[5],
+        0.0 - vxList[4],
+        vxList[9] - vxList[1],
+        vxList[8] - vxList[0]
+      ]);
     }
   }
 

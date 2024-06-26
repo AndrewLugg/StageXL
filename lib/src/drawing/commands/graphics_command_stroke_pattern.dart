@@ -1,12 +1,11 @@
-part of stagexl.drawing;
+part of '../../drawing.dart';
 
 class GraphicsCommandStrokePattern extends GraphicsCommandStroke {
   GraphicsPattern _pattern;
 
-  GraphicsCommandStrokePattern(GraphicsPattern pattern, num width,
-      JointStyle jointStyle, CapsStyle capsStyle)
-      : _pattern = pattern,
-        super(width, jointStyle, capsStyle);
+  GraphicsCommandStrokePattern(
+      GraphicsPattern pattern, super.width, super.jointStyle, super.capsStyle)
+      : _pattern = pattern;
 
   //---------------------------------------------------------------------------
 

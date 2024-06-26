@@ -1,5 +1,3 @@
-library stagexl.filters.normal_map;
-
 import 'dart:math' as math;
 
 import '../display.dart';
@@ -38,7 +36,7 @@ class NormalMapFilter extends BitmapFilter {
     final renderTexture = renderTextureQuad.renderTexture;
 
     final renderProgram = renderContext.getRenderProgram(
-        r'$NormalMapFilterProgram', () => NormalMapFilterProgram());
+        r'$NormalMapFilterProgram', NormalMapFilterProgram.new);
 
     renderContext.activateRenderProgram(renderProgram);
     renderContext.activateRenderTextureAt(renderTexture, 0);

@@ -1,5 +1,3 @@
-library stagexl.filters.glow;
-
 import 'dart:math' hide Point, Rectangle;
 
 import '../display.dart';
@@ -9,7 +7,7 @@ import '../internal/filter_helpers.dart';
 import '../internal/tools.dart';
 
 class GlowFilter extends BitmapFilter {
-  int _color = 0xFF000000;
+  int color = 0xFF000000;
   late int _blurX;
   late int _blurY;
   late int _quality;
@@ -21,13 +19,12 @@ class GlowFilter extends BitmapFilter {
   final List<int> _renderPassTargets = <int>[];
 
   GlowFilter(
-      [int color = 0xFF000000,
+      [this.color = 0xFF000000,
       int blurX = 4,
       int blurY = 4,
       int quality = 1,
       this.knockout = false,
       this.hideObject = false]) {
-    this.color = color;
     this.blurX = blurX;
     this.blurY = blurY;
     this.quality = quality;
@@ -50,14 +47,6 @@ class GlowFilter extends BitmapFilter {
   List<int> get renderPassTargets => _renderPassTargets;
 
   //---------------------------------------------------------------------------
-
-  /// The color of the glow.
-
-  int get color => _color;
-
-  set color(int value) {
-    _color = value;
-  }
 
   /// The horizontal blur radius in the range from 0 to 64.
 
@@ -162,7 +151,7 @@ class GlowFilter extends BitmapFilter {
       }
     } else {
       final renderProgram = renderContext.getRenderProgram(
-          r'$GlowFilterProgram', () => GlowFilterProgram());
+          r'$GlowFilterProgram', GlowFilterProgram.new);
 
       renderContext.activateRenderProgram(renderProgram);
       renderContext.activateRenderTexture(renderTexture);

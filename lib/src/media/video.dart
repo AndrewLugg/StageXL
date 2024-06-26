@@ -1,4 +1,4 @@
-part of stagexl.media;
+part of '../media.dart';
 
 /// The Video class is used to load and control videos.
 ///
@@ -91,8 +91,8 @@ class Video {
   Future<Video> clone() {
     final videoElement = this.videoElement.clone(true) as VideoElement;
     final completer = Completer<Video>();
-    late StreamSubscription onCanPlaySubscription;
-    late StreamSubscription onErrorSubscription;
+    late StreamSubscription<html.Event> onCanPlaySubscription;
+    late StreamSubscription<html.Event> onErrorSubscription;
 
     void onCanPlay(html.Event e) {
       final video = Video._(videoElement);

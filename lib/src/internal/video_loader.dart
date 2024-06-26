@@ -1,5 +1,3 @@
-library stagexl.internal.video_loader;
-
 import 'dart:async';
 import 'dart:html';
 
@@ -12,8 +10,8 @@ class VideoLoader {
   final AggregateError aggregateError = AggregateError('Error loading video.');
   final Completer<VideoElement> _completer = Completer<VideoElement>();
 
-  late StreamSubscription _onCanPlaySubscription;
-  late StreamSubscription _onErrorSubscription;
+  late StreamSubscription<Event> _onCanPlaySubscription;
+  late StreamSubscription<Event> _onErrorSubscription;
   final List<String> _urls = <String>[];
   bool _loadData = false;
 
@@ -71,7 +69,7 @@ class VideoLoader {
       reader.readAsDataUrl(request.response as Blob);
       reader.onLoadEnd.first
           .then((e) => _loadVideoSource(reader.result as String));
-    }).catchError((error) {
+    }).catchError((Object error) {
       final loadError = LoadError('Failed to load $url.', error);
       aggregateError.errors.add(loadError);
       _loadNextUrl();

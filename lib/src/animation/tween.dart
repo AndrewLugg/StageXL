@@ -1,4 +1,4 @@
-part of stagexl.animation;
+part of '../animation.dart';
 
 /// Use the [Tween] class to animate the properties of a display object like
 /// x, y, scaleX, scaleY, alpha, rotation etc. The animation starts with the
@@ -39,7 +39,12 @@ class Tween implements Animatable {
   num _totalTime = 0.0;
   num _currentTime = 0.0;
   num _delay = 0.0;
-  bool _roundToInt = false;
+
+  /// Specifies if the values should be rounded to an integer.
+  ///
+  /// Default is false.
+  bool roundToInt = false;
+
   bool _started = false;
 
   /// Creates a new [Tween] for the specified [TweenObject] with a duration
@@ -53,10 +58,6 @@ class Tween implements Animatable {
       [TransitionFunction transition = Transition.linear])
       : _tweenObject = tweenObject,
         _transition = transition {
-    if (_tweenObject is! TweenObject) {
-      throw ArgumentError('tweenObject');
-    }
-
     _totalTime = max(0.0001, time);
   }
 
@@ -124,7 +125,7 @@ class Tween implements Animatable {
         final num transition = _transition(ratio).toDouble();
 
         for (var i = 0; i < _tweenPropertyList.length; i++) {
-          _tweenPropertyList[i]._update(transition, _roundToInt);
+          _tweenPropertyList[i]._update(transition, roundToInt);
         }
         if (_onUpdate != null) {
           _onUpdate!();
@@ -173,16 +174,6 @@ class Tween implements Animatable {
       _currentTime = _currentTime + _delay - value;
       _delay = value;
     }
-  }
-
-  /// Specifies if the values should be rounded to an integer.
-  ///
-  /// Default is false.
-
-  bool get roundToInt => _roundToInt;
-
-  set roundToInt(bool value) {
-    _roundToInt = value;
   }
 
   /// Indicates if this [Tween] is completed.

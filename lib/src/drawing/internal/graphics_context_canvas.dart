@@ -1,4 +1,4 @@
-part of stagexl.drawing;
+part of '../../drawing.dart';
 
 class _GraphicsContextCanvas extends GraphicsContext {
   final RenderState renderState;
@@ -174,7 +174,7 @@ class _GraphicsContextCanvas extends GraphicsContext {
 //-----------------------------------------------------------------------------
 
 class _GraphicsContextCanvasMask extends _GraphicsContextCanvas {
-  _GraphicsContextCanvasMask(RenderState renderState) : super(renderState);
+  _GraphicsContextCanvasMask(super.renderState);
 
   @override
   void fillColor(int color) {

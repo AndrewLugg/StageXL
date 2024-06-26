@@ -1,4 +1,6 @@
-part of stagexl.drawing;
+// ignore_for_file: library_private_types_in_public_api
+
+part of '../../drawing.dart';
 
 class _GraphicsContextRender extends _GraphicsContextBase {
   final RenderState renderState;
@@ -72,7 +74,7 @@ class _GraphicsContextRender extends _GraphicsContextBase {
 //-----------------------------------------------------------------------------
 
 class GraphicsContextRenderMask extends _GraphicsContextRender {
-  GraphicsContextRenderMask(RenderState renderState) : super(renderState);
+  GraphicsContextRenderMask(super.renderState);
 
   @override
   void fillColor(int color) {

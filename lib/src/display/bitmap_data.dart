@@ -1,4 +1,4 @@
-part of stagexl.display;
+part of '../display.dart';
 
 /// The BitmapData class lets you load or create arbitrarily sized transparent
 /// or opaque bitmap images and manipulate them in various ways at runtime.
@@ -23,12 +23,6 @@ class BitmapData implements BitmapDrawable {
 
   static BitmapDataLoadOptions defaultLoadOptions = BitmapDataLoadOptions();
 
-  BitmapData.fromRenderTextureQuad(this.renderTextureQuad)
-      : width = renderTextureQuad.targetWidth,
-        height = renderTextureQuad.targetHeight;
-
-  //----------------------------------------------------------------------------
-
   factory BitmapData(num width, num height,
       [int fillColor = 0xFFFFFFFF, num pixelRatio = 1.0]) {
     final textureWidth = (width * pixelRatio).round();
@@ -38,10 +32,21 @@ class BitmapData implements BitmapDrawable {
     return BitmapData.fromRenderTextureQuad(renderTextureQuad);
   }
 
+  BitmapData.fromRenderTextureQuad(this.renderTextureQuad)
+      : width = renderTextureQuad.targetWidth,
+        height = renderTextureQuad.targetHeight;
+
   factory BitmapData.fromImageElement(ImageElement imageElement,
       [num pixelRatio = 1.0]) {
     final renderTexture = RenderTexture.fromImageElement(imageElement);
     final renderTextureQuad = renderTexture.quad.withPixelRatio(pixelRatio);
+    return BitmapData.fromRenderTextureQuad(renderTextureQuad);
+  }
+
+  factory BitmapData.fromImageBitmap(ImageBitmap imageBitmap,
+      [num pixelRatio = 1.0]) {
+    var renderTexture = RenderTexture.fromImageBitmap(imageBitmap);
+    var renderTextureQuad = renderTexture.quad.withPixelRatio(pixelRatio);
     return BitmapData.fromRenderTextureQuad(renderTextureQuad);
   }
 
@@ -62,11 +67,19 @@ class BitmapData implements BitmapDrawable {
 
   /// Loads a BitmapData from the given url.
 
-  static Future<BitmapData> load(String url, [BitmapDataLoadOptions? options]) {
+  static Future<BitmapData> load(String url,
+      [BitmapDataLoadOptions? options]) async {
     options = options ?? BitmapData.defaultLoadOptions;
     final bitmapDataFileInfo = BitmapDataLoadInfo(url, options.pixelRatios);
     final targetUrl = bitmapDataFileInfo.loaderUrl;
     final pixelRatio = bitmapDataFileInfo.pixelRatio;
+
+    if (env.isImageBitmapSupported) {
+      final loader = ImageBitmapLoader(targetUrl, options.webp);
+      final imageBitmap = await loader.done;
+      return BitmapData.fromImageBitmap(imageBitmap, pixelRatio);
+    }
+
     final loader = ImageLoader(targetUrl, options.webp, options.corsEnabled);
     return loader.done.then((i) => BitmapData.fromImageElement(i, pixelRatio));
   }

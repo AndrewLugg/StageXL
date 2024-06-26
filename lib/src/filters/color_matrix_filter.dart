@@ -1,5 +1,3 @@
-library stagexl.filters.color_matrix;
-
 import 'dart:math' hide Point, Rectangle;
 import 'dart:typed_data';
 
@@ -260,7 +258,7 @@ class ColorMatrixFilter extends BitmapFilter {
     final renderTexture = renderTextureQuad.renderTexture;
 
     final renderProgram = renderContext.getRenderProgram(
-        r'$ColorMatrixFilterProgram', () => ColorMatrixFilterProgram());
+        r'$ColorMatrixFilterProgram', ColorMatrixFilterProgram.new);
 
     renderContext.activateRenderProgram(renderProgram);
     renderContext.activateRenderTexture(renderTexture);
